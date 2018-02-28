@@ -37,11 +37,14 @@ function runit() {
    var myPromise = Sk.misceval.asyncToPromise(function() {
        return Sk.importMainWithBody("<stdin>", false, prog, true);
    });
+
    myPromise.then(function(mod) {
        console.log('success');
    },
        function(err) {
-       console.log(err.toString());
+           error_msg = err.toString();
+           document.getElementById("output").innerText = error_msg;
+           console.log(error_msg);
    });
 } 
 </script> 
