@@ -1,6 +1,6 @@
 # Recreates the database schema
-from app import db
-import user
+from grader import db
+import grader.models
 
 db.drop_all()
 db.create_all()

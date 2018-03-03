@@ -1,8 +1,10 @@
 from flask import Flask
 from flask_bcrypt import Bcrypt
+from flask_sqlalchemy import SQLAlchemy
 
-app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://root:glumpanda@localhost/online_grader_cs'
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app = Flask(__name__, instance_relative_config = True)
+app.config.from_object('config')
+app.config.from_pyfile('config.py')
 
+db = SQLAlchemy(app)
 bcrypt = Bcrypt(app)
