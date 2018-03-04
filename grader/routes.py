@@ -29,6 +29,6 @@ def dashboard_add_contest_page():
                         end_time=form.end_time.data)
         db.session.add(contest)
         db.session.commit()
-        
+
         return redirect(url_for('dashboard_page'))
     return render_template('add_contest.html', form=form)

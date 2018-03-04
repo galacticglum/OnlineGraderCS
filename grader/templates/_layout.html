@@ -11,9 +11,13 @@
         crossorigin="anonymous">
 
     <title>{% block title %}Online Grader{% endblock %}</title>
+
+    {% block head %}{% endblock %}
 </head>
 
 <body>
+    {% block body %}
+    {% block navbar %}
     <nav class="navbar navbar-expand-md navbar-dark bg-dark">
         <div class="container">
             <a class="navbar-brand" href="{{ url_for('home_page') }}">Online Grader</a>
@@ -49,7 +53,7 @@
                         </li>
                         {% else %}
                         <li class="nav-item">
-                            <a class="nav-link" href="{{ url_for('user.login') }}">Sign in
+                            <a class="nav-link" href="{{ url_for('user.register') }}">Register
                                 <span class="sr-only">(current)</span>
                             </a>
                         </li>
@@ -59,14 +63,28 @@
             </div>
         </div>
     </nav>
+    {% endblock %}
+
     <br>
 
     <div class="container">
-        <div class="jumbotron">
-            <h3>Basic Navbar Example</h3>
-            <p>A navigation bar is a navigation header that is placed at the top of the page.</p>
-        </div>
+        {# One-time system messages called Flash messages #}
+        {% block flash_messages %}
+            {%- with messages = get_flashed_messages(with_categories=true) -%}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        {% if category=='error' %}
+                            {% set category='danger' %}
+                        {% endif %}
+                        <div class="alert alert-{{category}}">{{ message|safe }}</div>
+                    {% endfor %}
+                {% endif %}
+            {%- endwith %}
+        {% endblock %}
+
+        {% block content %}{% endblock%}
     </div>
+    {% endblock %}
 
     <!-- Optional JavaScript -->
     <!-- jQuery first, then Popper.js, then Bootstrap JS -->
