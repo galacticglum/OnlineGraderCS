@@ -1,5 +1,6 @@
 from flask import render_template, redirect, url_for
 from flask_user import login_required
+from grader import app
 
 @app.route('/')
 def home_page():
