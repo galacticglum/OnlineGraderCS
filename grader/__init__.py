@@ -11,6 +11,8 @@ app.config.from_pyfile('config.py')
 db = SQLAlchemy(app)
 
 from grader.models.user import User
+from grader.routes import home_page
 
 db_adapter = SQLAlchemyAdapter(db, User)
-user_manager = UserManager(db_adapter, app)
+user_manager = UserManager(db_adapter, login_view_function=home_page)
+user_manager.init_app(app)

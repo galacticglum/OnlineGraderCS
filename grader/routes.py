@@ -3,10 +3,16 @@ from flask_user import login_required, roles_required
 from grader import app, db
 from grader.models.contest import Contest
 from grader.forms import AddContestForm
+from flask_user.views import login
+from flask_login import current_user
 
-@app.route('/')
+@app.route('/', methods=['GET', 'POST'])
 def home_page():
-    return render_template('home.html')
+    if current_user.is_authenticated:
+        print('moo')
+        return render_template('home.html')
+
+    return login()
 
 @app.route('/members')
 @login_required
