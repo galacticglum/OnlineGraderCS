@@ -1,13 +1,8 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField
+from wtforms import StringField, DateTimeField
 from wtforms.validators import DataRequired, Email
 
-class LoginForm(FlaskForm):
-    username = StringField('username', validators=[DataRequired()])
-    password = PasswordField('password', validators=[DataRequired()])
-
-class RegisterForm(FlaskForm):
-    username = StringField('username', validators=[DataRequired()])
-    password = PasswordField('password', validators=[DataRequired()])
-    first_name = StringField('firstname', validators=[DataRequired()])
-    last_name = StringField('lastname', validators=[DataRequired()])
+class AddContestForm(FlaskForm):
+    name = StringField('name', validators=[DataRequired()])
+    start_time = DateTimeField('start_time', validators=[DataRequired()])
+    end_time = DateTimeField('end_time', validators=[DataRequired()])
