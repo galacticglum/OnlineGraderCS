@@ -93,7 +93,7 @@ admin.add_view(MyModelView(Role, db.session))
 admin.add_view(MyModelView(User, db.session))
 
 # define a context processor for merging flask-admin's template context into the
-# flask-security views.
+# flask-security and app views.
 @security.context_processor
 @app.context_processor
 def context_processor():

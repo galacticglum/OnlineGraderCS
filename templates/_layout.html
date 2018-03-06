@@ -3,7 +3,7 @@
 {% include "security/_messages.html" %}
 
 {% block title %}
-Online Grader
+{% if self.page_name() %} {% block page_name %}{% endblock %} -{% endif %} Online Grader 
 {% endblock %}
 
 {% block brand %}
