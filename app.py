@@ -41,6 +41,9 @@ class User(db.Model, UserMixin):
     roles = db.relationship('Role', secondary=roles_users,
                             backref=db.backref('users', lazy='dynamic'))
 
+    def has_role(self, role):
+        return role in self.roles
+
     def __str__(self):
         return self.email
 
@@ -99,6 +102,18 @@ def security_context_processor():
         h=admin_helpers,
         get_url=url_for
     )
+
+# define a context processor for merging flask-admin's template context into the
+# regular flask views.
+@app.context_processor
+def context_processor():
+    return dict(
+        admin_base_template=admin.base_template,
+        admin_view=admin.index_view,
+        h=admin_helpers,
+        get_url=url_for
+    )
+
 
 
 def build_sample_db():
