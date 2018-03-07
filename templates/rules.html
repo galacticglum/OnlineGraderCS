@@ -1,17 +1,18 @@
 {% extends '_layout.html' %}
+{% set active_page = "rules" %}
 
 {% block page_name %}
-Home
+Rules
 {% endblock %}
 
 {% block body %}
 {{ super() }}
 <div class="row-fluid">
     <div class="col-sm-8 col-sm-offset-2">
-        <h1>Online Grader</h1>
+        <h1>Contest Rules</h1>
         <div class="well">
            <p>Welcome to the online grader system for the SLSS computer science club. Please familiarize yourself with 
-                the <a href="{{ url_for('rules') }}">contest rules</a> and <a href="/guidelines">platform usage guidelines</a>.
+                the <a href='/rules'>contest rules</a> and <a href="/guidelines">platform usage guidelines</a>.
            </p>
 
            <br>

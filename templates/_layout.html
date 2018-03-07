@@ -2,6 +2,13 @@
 {% from "security/_macros.html" import render_field, render_field_with_errors, render_checkbox_field %}
 {% include "security/_messages.html" %}
 
+{% set navigation_bar = [
+    ('index', 'index', 'Home'),
+    ('rules', 'rules', 'Rules')
+] -%}
+
+{% set active_page = active_page|default('index') -%}
+
 {% block title %}
 {% if self.page_name() %} {% block page_name %}{% endblock %} -{% endif %} Online Grader 
 {% endblock %}
@@ -12,9 +19,13 @@
 
 {% block main_menu %}
 <ul class="nav navbar-nav">
-    <li class="active">
-        <a href="/">Home</a>
-    </li>
+    {% block main_menu_items %}
+        {% for href, id, caption in navigation_bar %}
+            <li{% if id == active_page %} class="active"{% endif %}>
+                <a href="{{ url_for(href|e) }}">{{ caption|e }}</a>
+            </li>
+        {% endfor %}
+    {% endblock %}
     {% if current_user.is_authenticated and current_user.has_role('superuser') %}
     <li>
         <a href="/admin">Dashboard</a>

@@ -80,6 +80,11 @@ class MyModelView(sqla.ModelView):
 def index():
     return render_template('index.html')
 
+@app.route('/rules')
+def rules():
+    return render_template('rules.html')
+
+
 # Create admin
 admin = flask_admin.Admin(
     app,
