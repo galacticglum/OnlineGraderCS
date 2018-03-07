@@ -1,28 +1,96 @@
-{% extends '_layout.html' %}
-{% set active_page = "rules" %}
+{% extends '_layout.html' %} 
+{% set active_page = "rules" %} 
+{% block head %} 
+{{ super() }}
+<link rel="stylesheet" href="/static/css/rules.css">
+{% endblock %} 
 
-{% block page_name %}
+{% block tail %}
+<script src="/static/js/rules.js"></script> 
+{% endblock %}
+
+{% block page_name %} 
 Rules
 {% endblock %}
 
-{% block body %}
+{% block body %} 
 {{ super() }}
 <div class="row-fluid">
     <div class="col-sm-8 col-sm-offset-2">
-        <h1>Contest Rules</h1>
-        <div class="well">
-           <p>Welcome to the online grader system for the SLSS computer science club. Please familiarize yourself with 
-                the <a href='/rules'>contest rules</a> and <a href="/guidelines">platform usage guidelines</a>.
-           </p>
+        <a id="collapse-group" data-target="#contest" data-toggle="collapse" class="nounderline">
+            <h1>Contest Rules</h1>
+        </a>
 
-           <br>
-
-           {% if not current_user.is_authenticated %}
-            <p>
-                <a class="btn btn-primary" href="{{ url_for('security.login') }}">Login</a> <a class="btn btn-default" href="{{ url_for('security.register') }}">Register</a>
+        <div class="collapse in" id="contest">
+            <hr>
+            <h3>1. Implementation</h3>
+            <p>All input is from standard input and all output is from standard output. Programs submitted to the grader should
+                not read or write files.
             </p>
-            {% endif %}
+
+            <p>Outputs must exactly match the format specified in the problem. Prompts or additional output will render the
+                output invalid.
+            </p>
+
+            <br>
+            <h3>2. Submission</h3>
+            <p>The grader will accept up to 50 submissions per problem. Users may submit at most once per minute to any specific
+                problem.</p>
+
+            <br>
+            <h3>3. Resources, References, and Tools</h3>
+            <p>During the contest, contestants may use the internet for problem submissions and for reference consultation. Official
+                documentation sources are allowed, examples include:
+            </p>
+
+            <ul>
+                <li>
+                    <a href="https://docs.python.org/2/reference/index.html">Python 2 Documentation</a>
+                </li>
+                <li>
+                    <a href="https://docs.python.org/3/reference/index.html">Python 3 Documentation</a>
+                </li>
+            </ul>
+            <br>
         </div>
+
+        <a id="collapse-group" data-target="#guidelines" data-toggle="collapse" class="nounderline">
+            <h1>Platform Usage Guidelines</h1>
+        </a>
+
+        <div class="collapse" id="guidelines">
+            <hr>
+            <h3>1. Implementation</h3>
+            <p>All input is from standard input and all output is from standard output. Programs submitted to the grader should
+                not read or write files.
+            </p>
+
+            <p>Outputs must exactly match the format specified in the problem. Prompts or additional output will render the
+                output invalid.
+            </p>
+
+            <br>
+            <h3>2. Submission</h3>
+            <p>The grader will accept up to 50 submissions per problem. Users may submit at most once per minute to any specific
+                problem.</p>
+
+            <br>
+            <h3>3. Resources, References, and Tools</h3>
+            <p>During a contest, contestants may use the internet for problem submissions and for reference consultation. Official
+                documentation sources are allowed, examples include:
+            </p>
+
+            <ul>
+                <li>
+                    <a href="https://docs.python.org/2/reference/index.html">Python 2 Documentation</a>
+                </li>
+                <li>
+                    <a href="https://docs.python.org/3/reference/index.html">Python 3 Documentation</a>
+                </li>
+            </ul>
+        </div>
+
+        <br>
     </div>
 </div>
-{% endblock body %}
+{% endblock %}
