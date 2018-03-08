@@ -25,10 +25,7 @@ Home
                 <a class="btn btn-primary" href="{{ url_for('security.login') }}">Login</a> <a class="btn btn-default" href="{{ url_for('security.register') }}">Register</a>
             </p>
             {% else %}
-            {% if not contests is defined %}
-            <hr style="background-color: #b2b2b2b2; height: 1px; border: 0px">
-            <p>There are currently no open contests.</p>
-            {% else %} 
+            {% if contests  %}
             <br>
             <div class="table-responsive">         
                 <table class="table">
@@ -52,6 +49,9 @@ Home
                     </tbody>
                 </table>
             </div>
+            {% else %}
+            <hr style="background-color: #b2b2b2b2; height: 1px; border: 0px">
+            <p>There are currently no open contests.</p>
             {% endif %}
             {% endif %}
         </div>

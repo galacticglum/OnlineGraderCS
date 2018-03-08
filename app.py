@@ -127,6 +127,12 @@ def index():
     contests = None
     if current_user.is_authenticated:
         contests = db.session.query(Contest)
+
+        # We need to nullify our contests query if there are no elements.
+        # This is because our template checks whether the contest is null
+        if contests.count() == 0:
+            contests = None
+        
     return render_template('index.html', contests=contests)
 
 @app.route('/rules')
