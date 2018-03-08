@@ -138,7 +138,7 @@ def index():
         contests = db.session.query(Contest)
 
         # We need to nullify our contests query if there are no elements.
-        # This is because our template checks whether the contest is null
+        # This is because our template checks whether the contest is null (not the length)
         if contests.count() == 0:
             contests = None
         
@@ -160,7 +160,7 @@ def contest(contest_id):
 
     # Check if the contest has expired or if it hasn't started yet
     if not contest.is_running():
-        flash('Sorry, the contest you are trying to join has closed.', 'error')
+        flash('Sorry, the contest you are trying to join is closed.', 'error')
         return redirect(url_for('index'))
 
     participation_query = db.session.query(ContestParticipation).filter(ContestParticipation.user_id == current_user.id) \
@@ -169,7 +169,9 @@ def contest(contest_id):
     already_joined = participation_query.count() > 0
 
     if not already_joined:
-        contest_participation = ContestParticipation(user_id=current_user.id, contest_id=contest_id, join_time=datetime.datetime.now())
+        contest_participation = ContestParticipation(user_id=current_user.id, contest_id=contest_id, 
+            join_time=datetime.datetime.now())
+            
         db.session.add(contest_participation)
         db.session.commit()
 
