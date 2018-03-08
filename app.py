@@ -1,4 +1,6 @@
 import os
+import datetime
+
 from flask import Flask, url_for, redirect, render_template, request, abort, flash
 from flask_sqlalchemy import SQLAlchemy
 from flask_security import Security, SQLAlchemyUserDatastore, UserMixin, RoleMixin, login_required, current_user
@@ -53,7 +55,7 @@ class Contest(db.Model):
     name = db.Column(db.String(255), unique=True)
     start_time = db.Column(db.DateTime)
     end_time = db.Column(db.DateTime)
-    # TODO: Add contest duration
+    duration_minutes = db.Column(db.Integer)
 
     def __str__(self):
         return self.name
@@ -141,17 +143,22 @@ def contest(contest_id):
         abort(404)
         return
 
-    already_joined = db.session.query(ContestParticipation).filter(ContestParticipation.user_id == current_user.id) \
-        .filter(ContestParticipation.contest_id == contest_id).count() > 0
+    participation_query = db.session.query(ContestParticipation).filter(ContestParticipation.user_id == current_user.id) \
+        .filter(ContestParticipation.contest_id == contest_id)
+
+    already_joined = participation_query.count() > 0
 
     if not already_joined:
-        contest_participation = ContestParticipation(user_id=current_user.id, contest_id=contest_id, join_time=func.now())
+        contest_participation = ContestParticipation(user_id=current_user.id, contest_id=contest_id, join_time=datetime.datetime.now())
         db.session.add(contest_participation)
         db.session.commit()
 
         flash(f'Successfully joined {contest.name}!')
+    else:
+        contest_participation = participation_query.first()
 
-    return render_template('contest.html', contest=contest)
+    time_left = contest_participation.join_time + datetime.timedelta(minutes=contest.duration_minutes) - datetime.datetime.now()
+    return render_template('contest.html', contest=contest, time_left=time_left.total_seconds())
 
 # Create admin
 admin = flask_admin.Admin(
