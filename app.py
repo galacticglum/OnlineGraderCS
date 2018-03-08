@@ -57,6 +57,15 @@ class Contest(db.Model):
     end_time = db.Column(db.DateTime)
     duration_minutes = db.Column(db.Integer)
 
+    def has_started(self):
+        return datetime.datetime.now() > self.start_time
+
+    def has_expired(self):
+        return datetime.datetime.now() > self.end_time
+
+    def is_running(self):
+        return self.has_started() and not self.has_expired()
+
     def __str__(self):
         return self.name
 
@@ -148,6 +157,11 @@ def contest(contest_id):
     if contest == None:
         abort(404)
         return
+
+    # Check if the contest has expired or if it hasn't started yet
+    if not contest.is_running():
+        flash('Sorry, the contest you are trying to join has closed.', 'error')
+        return redirect(url_for('index'))
 
     participation_query = db.session.query(ContestParticipation).filter(ContestParticipation.user_id == current_user.id) \
         .filter(ContestParticipation.contest_id == contest_id)
