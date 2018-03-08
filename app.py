@@ -1,11 +1,12 @@
 import os
-from flask import Flask, url_for, redirect, render_template, request, abort
+from flask import Flask, url_for, redirect, render_template, request, abort, flash
 from flask_sqlalchemy import SQLAlchemy
 from flask_security import Security, SQLAlchemyUserDatastore, UserMixin, RoleMixin, login_required, current_user
 from flask_security.utils import encrypt_password
 import flask_admin
 from flask_admin.contrib import sqla
 from flask_admin import helpers as admin_helpers
+from sqlalchemy.sql import func
 
 # Create Flask application
 app = Flask(__name__)
@@ -52,6 +53,7 @@ class Contest(db.Model):
     name = db.Column(db.String(255), unique=True)
     start_time = db.Column(db.DateTime)
     end_time = db.Column(db.DateTime)
+    # TODO: Add contest duration
 
     def __str__(self):
         return self.name
@@ -130,8 +132,25 @@ def rules():
     return render_template('rules.html')
 
 @app.route('/contest/<int:contest_id>')
+@login_required
 def contest(contest_id):
     contest = db.session.query(Contest).filter(Contest.id == contest_id).first()
+
+    # If the contest doesn't exist, we show a 404 error.
+    if contest == None:
+        abort(404)
+        return
+
+    already_joined = db.session.query(ContestParticipation).filter(ContestParticipation.user_id == current_user.id) \
+        .filter(ContestParticipation.contest_id == contest_id).count() > 0
+
+    if not already_joined:
+        contest_participation = ContestParticipation(user_id=current_user.id, contest_id=contest_id, join_time=func.now())
+        db.session.add(contest_participation)
+        db.session.commit()
+
+        flash(f'Successfully joined {contest.name}!')
+
     return render_template('contest.html', contest=contest)
 
 # Create admin
