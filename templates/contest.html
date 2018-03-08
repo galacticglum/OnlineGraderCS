@@ -1,0 +1,44 @@
+{% extends '_layout.html' %}
+{% set active_page = "" %}
+
+{% block head %}
+{{ super() }}
+<link rel="stylesheet" href="/static/css/index.css">
+{% endblock %}
+
+{% block page_name %}
+Contest - {{ contest.name}}
+{% endblock %}
+
+{% block body %}
+{{ super() }}
+<div class="row-fluid">
+    <div class="col-sm-8 col-sm-offset-2">
+        <h1>{{contest.name}}</h1>
+        <div class="well">
+            <div class="table-responsive">         
+                <table class="table">
+                    <thead>
+                    <tr>
+                        <th>Problem</th>
+                        <th>Most Recent Submission</th>
+                        <th>Highest Scoring Submission</th>
+                        <th>Highest Score</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for problem in contest.problems %}
+                    <tr>
+                        <td><a href="{{ problem.link }}">{{ problem.name }}</a></td>
+                        <td>None</td>
+                        <td>None</td>
+                        <td>0 / {{problem.total_points}}</td>
+                    </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock body %}

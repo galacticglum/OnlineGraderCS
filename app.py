@@ -16,13 +16,13 @@ db = SQLAlchemy(app)
 # Define models
 roles_users = db.Table(
     'roles_users',
-    db.Column('user_id', db.Integer(), db.ForeignKey('user.id')),
-    db.Column('role_id', db.Integer(), db.ForeignKey('role.id'))
+    db.Column('user_id', db.Integer, db.ForeignKey('user.id')),
+    db.Column('role_id', db.Integer, db.ForeignKey('role.id'))
 )
 
 
 class Role(db.Model, RoleMixin):
-    id = db.Column(db.Integer(), primary_key=True)
+    id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(80), unique=True)
     description = db.Column(db.String(255))
 
@@ -36,8 +36,8 @@ class User(db.Model, UserMixin):
     last_name = db.Column(db.String(255))
     email = db.Column(db.String(255), unique=True)
     password = db.Column(db.String(255))
-    active = db.Column(db.Boolean())
-    confirmed_at = db.Column(db.DateTime())
+    active = db.Column(db.Boolean)
+    confirmed_at = db.Column(db.DateTime)
     roles = db.relationship('Role', secondary=roles_users,
                             backref=db.backref('users', lazy='dynamic'))
 
@@ -47,6 +47,48 @@ class User(db.Model, UserMixin):
     def __str__(self):
         return self.email
 
+class Contest(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(255), unique=True)
+    start_time = db.Column(db.DateTime)
+    end_time = db.Column(db.DateTime)
+
+    def __str__(self):
+        return self.name
+
+class Problem(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(255))
+    link = db.Column(db.String(255))
+    total_points = db.Column(db.Integer)
+    contest_id = db.Column(db.Integer, db.ForeignKey(Contest.id))
+    contest = db.relationship('Contest', backref=db.backref('problems', lazy='dynamic'))
+
+    def __str__(self):
+        return self.name
+
+class Testcase(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(255))
+    input_data = db.Column(db.Text)
+    output_data = db.Column(db.Text)
+    problem_id = db.Column(db.Integer, db.ForeignKey(Problem.id))
+    problem = db.relationship('Problem', backref=db.backref('testcases', lazy='dynamic'))
+
+    def __str__(self):
+        return self.name
+
+class ContestParticipation(db.Model):
+    user_id = db.Column(db.Integer, primary_key=True)
+    contest_id = db.Column(db.Integer, primary_key=True)
+    join_time = db.Column(db.DateTime)
+
+class Submission(db.Model):
+    user_id = db.Column(db.Integer, primary_key=True)
+    problem_id = db.Column(db.Integer, primary_key=True)
+    time = db.Column(db.DateTime, primary_key=True)
+    code = db.Column(db.String(1000))
+    score = db.Column(db.Integer)
 
 # Setup Flask-Security
 user_datastore = SQLAlchemyUserDatastore(db, User, Role)
@@ -78,12 +120,19 @@ class MyModelView(sqla.ModelView):
 # Flask views
 @app.route('/')
 def index():
-    return render_template('index.html')
+    contests = None
+    if current_user.is_authenticated:
+        contests = db.session.query(Contest)
+    return render_template('index.html', contests=contests)
 
 @app.route('/rules')
 def rules():
     return render_template('rules.html')
 
+@app.route('/contest/<int:contest_id>')
+def contest(contest_id):
+    contest = db.session.query(Contest).filter(Contest.id == contest_id).first()
+    return render_template('contest.html', contest=contest)
 
 # Create admin
 admin = flask_admin.Admin(
@@ -96,6 +145,9 @@ admin = flask_admin.Admin(
 # Add model views
 admin.add_view(MyModelView(Role, db.session))
 admin.add_view(MyModelView(User, db.session))
+admin.add_view(MyModelView(Contest, db.session))
+admin.add_view(MyModelView(Problem, db.session))
+admin.add_view(MyModelView(Testcase, db.session))
 
 # define a context processor for merging flask-admin's template context into the
 # flask-security and app views.
@@ -106,7 +158,7 @@ def context_processor():
         admin_base_template=admin.base_template,
         admin_view=admin.index_view,
         h=admin_helpers,
-        get_url=url_for
+        get_url=url_for,
     )
 
 
