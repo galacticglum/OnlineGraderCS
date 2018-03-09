@@ -3,6 +3,7 @@ import datetime
 import subprocess
 import threading
 import tempfile
+import shutil
 
 from flask import Flask, url_for, redirect, render_template, request, abort, flash
 from flask_sqlalchemy import SQLAlchemy
@@ -169,31 +170,32 @@ class SubmissionForm(Form):
     language = SelectField('language')
     file = FileField('file')
 
-def run_testcase(source_code, input_data, expected_output, testcase_id, submission_id, language_mode):
-    output = str()
+def run_testcase_compiled(input_data, expected_output, testcase_id, submission_id, language_mode, exec_filepath, do_delete=False):
+    if language_mode == 0: return
 
-    # Python 3
-    if language_mode == 0:
-        output = subprocess.check_output(["python", "-c", source_code], input=input_data, timeout=app.config['SCRIPT_RUN_TIMEOUT']).decode('utf-8')
-    elif language_mode == 1:
-        with tempfile.TemporaryDirectory() as temp_dir:
-            temp_exec_file = tempfile.NamedTemporaryFile(dir=temp_dir, delete=False)
-            temp_source_file = tempfile.NamedTemporaryFile(dir=temp_dir, mode='w', delete=False)
-
-            print('Source: {0}\nExec: {1}'.format(temp_source_file.name, temp_exec_file.name))
-
-            temp_source_file.write(source_code)
-            temp_source_file.close()
-            temp_exec_file.close()
-
-            subprocess.run(["csc", "-out:{0}".format(temp_exec_file.name), temp_source_file.name])
-            os.remove(temp_source_file.name)
-
-            output = subprocess.check_output(["mono", temp_exec_file.name], input=input_data, timeout=app.config['SCRIPT_RUN_TIMEOUT']).decode('utf-8')
-            os.remove(temp_exec_file.name)
+    command = str()
+    if language_mode == 1:
+        command = ["mono", exec_filepath]
     elif language_mode == 2:
-        pass
+        command = ["java", "-classpath", "{0}".format(exec_filepath), "Main"]
 
+    output = subprocess.check_output(command, input=input_data, timeout=app.config['SCRIPT_RUN_TIMEOUT']).decode('utf-8')
+    write_test_run(expected_output, output, testcase_id, submission_id)
+
+    if do_delete:
+        dir_path = exec_filepath
+        if language_mode == 1:
+            dir_path = os.path.dirname(os.path.realpath(exec_filepath))
+        
+        shutil.rmtree(dir_path)
+
+def run_testcase_python(source_code, input_data, expected_output, testcase_id, submission_id, language_mode):
+    if language_mode != 0: return
+
+    output = subprocess.check_output(["python", "-c", source_code], input=input_data, timeout=app.config['SCRIPT_RUN_TIMEOUT']).decode('utf-8')
+    write_test_run(expected_output, output, testcase_id, submission_id)
+
+def write_test_run(expected_output, output, testcase_id, submission_id):
     with app.app_context():
         correct = Testcase.matches(expected_output, output.splitlines())
         test_run = TestRun(testcase_id=testcase_id, submission_id=submission_id, status=(1 if correct else -1))
@@ -219,12 +221,51 @@ def contest(contest_id):
         db.session.commit()
 
         problem = db.session.query(Problem).filter(Problem.id == form.problem.data).first()
-        for testcase in problem.testcases:
+
+        temp_dir = tempfile.mkdtemp()
+        language_mode = int(form.language.data)
+            
+        temp_exec_file = None
+        if language_mode != 0:
+            temp_source_file = None
+            temp_exec_file = None
+            suffix = str()
+
+            if language_mode == 2:
+                suffix = ".java"
+            else:
+                temp_exec_file = tempfile.NamedTemporaryFile(dir=temp_dir, delete=False)
+                temp_exec_file.close()
+
+            temp_source_file = tempfile.NamedTemporaryFile(dir=temp_dir, mode='w', delete=False, suffix=suffix)
+            temp_source_file.write(source_code)
+            temp_source_file.close()
+
+            if language_mode == 1:
+                subprocess.run(["csc", "-out:{0}".format(temp_exec_file.name), temp_source_file.name])
+            elif language_mode == 2:
+                subprocess.run(["javac", temp_source_file.name])
+
+            os.remove(temp_source_file.name)
+
+        testcases = problem.testcases.all()
+        for i in range(len(testcases)):
+            testcase = testcases[i]
+
             binary_input = testcase.input_data.encode('utf-8')
             expected_output = testcase.output_data.splitlines()
 
-            thread = threading.Thread(target=run_testcase, args=(source_code, binary_input, expected_output, testcase.id, submission.id, int(form.language.data)))
-            thread.start()
+            compile_thread = None
+            if language_mode == 0:
+                compile_thread = threading.Thread(target=run_testcase_python, args=(source_code, binary_input, expected_output, testcase.id, \
+                    submission.id, language_mode))
+            else:
+                do_delete = i == len(testcases) - 1
+
+                compile_thread = threading.Thread(target=run_testcase_compiled, args=(binary_input, expected_output, testcase.id, submission.id, \
+                    language_mode, (temp_exec_file.name if language_mode == 1 else temp_dir), do_delete))
+            
+            compile_thread.start()
 
         return redirect(url_for('contest', contest_id=contest_id))
     else:
