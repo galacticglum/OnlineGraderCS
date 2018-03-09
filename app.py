@@ -221,7 +221,7 @@ def contest(contest_id):
             db.session.add(contest_participation)
             db.session.commit()
 
-            flash(f'Successfully joined {contest.name}!')
+            flash('Successfully joined {0}!'.format(contest.name))
         else:
             contest_participation = participation_query.first()
 
