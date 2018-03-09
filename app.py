@@ -1,5 +1,6 @@
 import datetime
 import subprocess
+import threading
 
 from flask import Flask, url_for, redirect, render_template, request, abort, flash
 from flask_sqlalchemy import SQLAlchemy
@@ -88,11 +89,10 @@ class Testcase(db.Model):
     problem_id = db.Column(db.Integer, db.ForeignKey(Problem.id))
     problem = db.relationship('Problem', backref=db.backref('testcases', lazy='dynamic'))
 
-    def matches(self, output):
-        output_lines = self.output_data.splitlines()
-        if len(output) != len(output_lines): return False
-        for i in range(len(output)):
-            if output_lines[i] != output[i]: return False
+    def matches(expected_output, real_output):
+        if len(expected_output) != len(real_output): return False
+        for i in range(len(expected_output)):
+            if real_output[i] != expected_output[i]: return False
 
         return True
 
@@ -167,6 +167,14 @@ class SubmissionForm(Form):
     language = SelectField('language')
     file = FileField('file')
 
+def run_python_testcase(source_code, input_data, expected_output, testcase_id, submission_id):
+    with app.app_context():
+        output = subprocess.check_output(["python", "-c", source_code], input=input_data, timeout=app.config['SCRIPT_RUN_TIMEOUT']).decode('utf-8')
+        correct = Testcase.matches(expected_output, output.splitlines())
+        test_run = TestRun(testcase_id=testcase_id, submission_id=submission_id, status=(1 if correct else -1))
+        db.session.add(test_run)
+        db.session.commit()
+
 @app.route('/contest/<int:contest_id>', methods=['GET', 'POST'])
 @login_required
 def contest(contest_id):
@@ -189,12 +197,10 @@ def contest(contest_id):
         problem = db.session.query(Problem).filter(Problem.id == form.problem.data).first()
         for testcase in problem.testcases:
             binary_input = testcase.input_data.encode('utf-8')
-            output = subprocess.check_output(["python", "-c", source_code], input=binary_input, timeout=app.config['SCRIPT_RUN_TIMEOUT']).decode('utf-8')
+            expected_output = testcase.output_data.splitlines()
 
-            correct = testcase.matches(output.splitlines())
-            test_run = TestRun(testcase_id=testcase.id, submission_id=submission_id, status=(1 if correct else -1))
-            db.session.add(test_run)
-            db.session.commit()
+            thread = threading.Thread(target=run_python_testcase, args=(source_code, binary_input, expected_output, testcase.id, submission_id))
+            thread.start()
 
         return redirect(url_for('contest', contest_id=contest_id))
     else:
