@@ -40,6 +40,45 @@ Contest - {{ contest.name}}
                 </table>
             </div>
         </div>
+
+        <hr>
+        <h3>Submit Solution</h3>
+        <form method="POST" enctype="multipart/form-data" action="">
+            <div class="table-responsive">
+                <table>
+                    <tr>
+                        <td>Problem</td>
+                        <td align="right">
+                            <select name="problem">
+                                {% for problem in contest.problems %}
+                                    <option value="{{problem.id}}">{{problem.name}}</option>
+                                {% endfor %}
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Language</td>
+                        <td align="right">
+                            <select name="language">
+                                <option value="0">Python</option>
+                                <option value="1">C#</option>
+                                <option value="2">Java</option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>File</td>
+                        <td align="right">
+                            <input type="file" name="file"/>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td></td>
+                        <td align="right" style="padding-left: 50px"><input class="btn btn-primary btn-sm" type="submit" value="Submit"/></td>
+                    </tr>
+                </table>
+            </div>
+        </form>
     </div>
 </div>
 {% endblock body %}

@@ -9,6 +9,7 @@ import flask_admin
 from flask_admin.contrib import sqla
 from flask_admin import helpers as admin_helpers
 from sqlalchemy.sql import func
+from wtforms import Form, SelectField, FileField
 
 # Create Flask application
 app = Flask(__name__)
@@ -100,7 +101,7 @@ class Submission(db.Model):
     user_id = db.Column(db.Integer, primary_key=True)
     problem_id = db.Column(db.Integer, primary_key=True)
     time = db.Column(db.DateTime, primary_key=True)
-    code = db.Column(db.String(1000))
+    code = db.Column(db.Text)
     score = db.Column(db.Integer)
 
 # Setup Flask-Security
@@ -148,9 +149,15 @@ def index():
 def rules():
     return render_template('rules.html')
 
-@app.route('/contest/<int:contest_id>')
+class SubmissionForm(Form):
+    problem = SelectField('problem')
+    language = SelectField('language')
+    file = FileField('file')
+
+@app.route('/contest/<int:contest_id>', methods=['GET', 'POST'])
 @login_required
 def contest(contest_id):
+    form = SubmissionForm(request.form)
     contest = db.session.query(Contest).filter(Contest.id == contest_id).first()
 
     # If the contest doesn't exist, we show a 404 error.
@@ -158,29 +165,35 @@ def contest(contest_id):
         abort(404)
         return
 
-    # Check if the contest has expired or if it hasn't started yet
-    if not contest.is_running():
-        flash('Sorry, the contest you are trying to join is closed.', 'error')
-        return redirect(url_for('index'))
-
-    participation_query = db.session.query(ContestParticipation).filter(ContestParticipation.user_id == current_user.id) \
-        .filter(ContestParticipation.contest_id == contest_id)
-
-    already_joined = participation_query.count() > 0
-
-    if not already_joined:
-        contest_participation = ContestParticipation(user_id=current_user.id, contest_id=contest_id, 
-            join_time=datetime.datetime.now())
-            
-        db.session.add(contest_participation)
+    if request.method == 'POST':
+        submission = Submission(user_id=current_user.id, problem_id=form.problem.data, time=datetime.datetime.now(), code=request.files['file'].read(), score=0)
+        db.session.add(submission)
         db.session.commit()
-
-        flash(f'Successfully joined {contest.name}!')
+        return redirect(url_for('contest', contest_id=contest_id))
     else:
-        contest_participation = participation_query.first()
+        # Check if the contest has expired or if it hasn't started yet
+        if not contest.is_running():
+            flash('Sorry, the contest you are trying to join is closed.', 'error')
+            return redirect(url_for('index'))
 
-    time_left = contest_participation.join_time + datetime.timedelta(minutes=contest.duration_minutes) - datetime.datetime.now()
-    return render_template('contest.html', contest=contest, time_left=time_left.total_seconds())
+        participation_query = db.session.query(ContestParticipation).filter(ContestParticipation.user_id == current_user.id) \
+            .filter(ContestParticipation.contest_id == contest_id)
+
+        already_joined = participation_query.count() > 0
+
+        if not already_joined:
+            contest_participation = ContestParticipation(user_id=current_user.id, contest_id=contest_id, 
+                join_time=datetime.datetime.now())
+                
+            db.session.add(contest_participation)
+            db.session.commit()
+
+            flash(f'Successfully joined {contest.name}!')
+        else:
+            contest_participation = participation_query.first()
+
+        time_left = contest_participation.join_time + datetime.timedelta(minutes=contest.duration_minutes) - datetime.datetime.now()
+        return render_template('contest.html', contest=contest, time_left=time_left.total_seconds())
 
 # Create admin
 admin = flask_admin.Admin(
