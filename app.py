@@ -1,6 +1,8 @@
+import os
 import datetime
 import subprocess
 import threading
+import tempfile
 
 from flask import Flask, url_for, redirect, render_template, request, abort, flash
 from flask_sqlalchemy import SQLAlchemy
@@ -167,9 +169,32 @@ class SubmissionForm(Form):
     language = SelectField('language')
     file = FileField('file')
 
-def run_python_testcase(source_code, input_data, expected_output, testcase_id, submission_id):
-    with app.app_context():
+def run_testcase(source_code, input_data, expected_output, testcase_id, submission_id, language_mode):
+    output = str()
+
+    # Python 3
+    if language_mode == 0:
         output = subprocess.check_output(["python", "-c", source_code], input=input_data, timeout=app.config['SCRIPT_RUN_TIMEOUT']).decode('utf-8')
+    elif language_mode == 1:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            temp_exec_file = tempfile.NamedTemporaryFile(dir=temp_dir, delete=False)
+            temp_source_file = tempfile.NamedTemporaryFile(dir=temp_dir, mode='w', delete=False)
+
+            print('Source: {0}\nExec: {1}'.format(temp_source_file.name, temp_exec_file.name))
+
+            temp_source_file.write(source_code)
+            temp_source_file.close()
+            temp_exec_file.close()
+
+            subprocess.run(["csc", "-out:{0}".format(temp_exec_file.name), temp_source_file.name])
+            os.remove(temp_source_file.name)
+
+            output = subprocess.check_output(["mono", temp_exec_file.name], input=input_data, timeout=app.config['SCRIPT_RUN_TIMEOUT']).decode('utf-8')
+            os.remove(temp_exec_file.name)
+    elif language_mode == 2:
+        pass
+
+    with app.app_context():
         correct = Testcase.matches(expected_output, output.splitlines())
         test_run = TestRun(testcase_id=testcase_id, submission_id=submission_id, status=(1 if correct else -1))
         db.session.add(test_run)
@@ -192,14 +217,13 @@ def contest(contest_id):
         submission = Submission(user_id=current_user.id, problem_id=form.problem.data, time=datetime.datetime.now(), code=source_code, score=0)
         db.session.add(submission)
         db.session.commit()
-        submission_id = submission.id
 
         problem = db.session.query(Problem).filter(Problem.id == form.problem.data).first()
         for testcase in problem.testcases:
             binary_input = testcase.input_data.encode('utf-8')
             expected_output = testcase.output_data.splitlines()
 
-            thread = threading.Thread(target=run_python_testcase, args=(source_code, binary_input, expected_output, testcase.id, submission_id))
+            thread = threading.Thread(target=run_testcase, args=(source_code, binary_input, expected_output, testcase.id, submission.id, int(form.language.data)))
             thread.start()
 
         return redirect(url_for('contest', contest_id=contest_id))
@@ -257,4 +281,4 @@ def context_processor():
 
 if __name__ == '__main__':
     # Start app
-    app.run(debug=True, host= '0.0.0.0')
+    app.run(debug=True, host='0.0.0.0')
