@@ -17,14 +17,12 @@ app.config.from_object('config')
 app.config.from_pyfile('config.py')
 db = SQLAlchemy(app)
 
-
 # Define models
 roles_users = db.Table(
     'roles_users',
     db.Column('user_id', db.Integer, db.ForeignKey('user.id')),
     db.Column('role_id', db.Integer, db.ForeignKey('role.id'))
 )
-
 
 class Role(db.Model, RoleMixin):
     id = db.Column(db.Integer, primary_key=True)
