@@ -1,5 +1,5 @@
-import os
 import datetime
+import subprocess
 
 from flask import Flask, url_for, redirect, render_template, request, abort, flash
 from flask_sqlalchemy import SQLAlchemy
@@ -12,7 +12,8 @@ from sqlalchemy.sql import func
 from wtforms import Form, SelectField, FileField
 
 # Create Flask application
-app = Flask(__name__)
+app = Flask(__name__, instance_relative_config = True)
+app.config.from_object('config')
 app.config.from_pyfile('config.py')
 db = SQLAlchemy(app)
 
@@ -89,6 +90,14 @@ class Testcase(db.Model):
     problem_id = db.Column(db.Integer, db.ForeignKey(Problem.id))
     problem = db.relationship('Problem', backref=db.backref('testcases', lazy='dynamic'))
 
+    def matches(self, output):
+        output_lines = self.output_data.splitlines()
+        if len(output) != len(output_lines): return False
+        for i in range(len(output)):
+            if output_lines[i] != output[i]: return False
+
+        return True
+
     def __str__(self):
         return self.name
 
@@ -98,11 +107,17 @@ class ContestParticipation(db.Model):
     join_time = db.Column(db.DateTime)
 
 class Submission(db.Model):
-    user_id = db.Column(db.Integer, primary_key=True)
-    problem_id = db.Column(db.Integer, primary_key=True)
-    time = db.Column(db.DateTime, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    user_id = db.Column(db.Integer)
+    problem_id = db.Column(db.Integer)
+    time = db.Column(db.DateTime)
     code = db.Column(db.Text)
     score = db.Column(db.Integer)
+
+class TestRun(db.Model):
+    testcase_id = db.Column(db.Integer, primary_key=True)
+    submission_id = db.Column(db.Integer, primary_key=True)
+    status = db.Column(db.Integer)
 
 # Setup Flask-Security
 user_datastore = SQLAlchemyUserDatastore(db, User, Role)
@@ -166,9 +181,23 @@ def contest(contest_id):
         return
 
     if request.method == 'POST':
-        submission = Submission(user_id=current_user.id, problem_id=form.problem.data, time=datetime.datetime.now(), code=request.files['file'].read(), score=0)
+        source_code = request.files['file'].read().decode('utf-8')
+
+        submission = Submission(user_id=current_user.id, problem_id=form.problem.data, time=datetime.datetime.now(), code=source_code, score=0)
         db.session.add(submission)
         db.session.commit()
+        submission_id = submission.id
+
+        problem = db.session.query(Problem).filter(Problem.id == form.problem.data).first()
+        for testcase in problem.testcases:
+            binary_input = testcase.input_data.encode('utf-8')
+            output = subprocess.check_output(["python", "-c", source_code], input=binary_input, timeout=app.config['SCRIPT_RUN_TIMEOUT']).decode('utf-8')
+
+            correct = testcase.matches(output.splitlines())
+            test_run = TestRun(testcase_id=testcase.id, submission_id=submission_id, status=(1 if correct else -1))
+            db.session.add(test_run)
+            db.session.commit()
+
         return redirect(url_for('contest', contest_id=contest_id))
     else:
         # Check if the contest has expired or if it hasn't started yet
@@ -222,63 +251,6 @@ def context_processor():
         get_url=url_for,
     )
 
-
-def build_sample_db():
-    """
-    Populate a small db with some example entries.
-    """
-
-    import string
-    import random
-
-    db.drop_all()
-    db.create_all()
-
-    with app.app_context():
-        user_role = Role(name='user')
-        super_user_role = Role(name='superuser')
-        db.session.add(user_role)
-        db.session.add(super_user_role)
-        db.session.commit()
-
-        test_user = user_datastore.create_user(
-            first_name='Admin',
-            email='admin',
-            password=encrypt_password('admin'),
-            roles=[user_role, super_user_role]
-        )
-
-        first_names = [
-            'Harry', 'Amelia', 'Oliver', 'Jack', 'Isabella', 'Charlie', 'Sophie', 'Mia',
-            'Jacob', 'Thomas', 'Emily', 'Lily', 'Ava', 'Isla', 'Alfie', 'Olivia', 'Jessica',
-            'Riley', 'William', 'James', 'Geoffrey', 'Lisa', 'Benjamin', 'Stacey', 'Lucy'
-        ]
-        last_names = [
-            'Brown', 'Smith', 'Patel', 'Jones', 'Williams', 'Johnson', 'Taylor', 'Thomas',
-            'Roberts', 'Khan', 'Lewis', 'Jackson', 'Clarke', 'James', 'Phillips', 'Wilson',
-            'Ali', 'Mason', 'Mitchell', 'Rose', 'Davis', 'Davies', 'Rodriguez', 'Cox', 'Alexander'
-        ]
-
-        for i in range(len(first_names)):
-            tmp_email = first_names[i].lower() + "." + last_names[i].lower() + "@example.com"
-            tmp_pass = ''.join(random.choice(string.ascii_lowercase + string.digits) for i in range(10))
-            user_datastore.create_user(
-                first_name=first_names[i],
-                last_name=last_names[i],
-                email=tmp_email,
-                password=encrypt_password(tmp_pass),
-                roles=[user_role, ]
-            )
-        db.session.commit()
-    return
-
 if __name__ == '__main__':
-
-    # Build a sample db on the fly, if one does not exist yet.
-    app_dir = os.path.realpath(os.path.dirname(__file__))
-    database_path = os.path.join(app_dir, app.config['DATABASE_FILE'])
-    if not os.path.exists(database_path):
-        build_sample_db()
-
     # Start app
     app.run(debug=True)
