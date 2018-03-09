@@ -242,9 +242,9 @@ def contest(contest_id):
             temp_source_file.close()
 
             if language_mode == 1:
-                subprocess.run(["csc", "-out:{0}".format(temp_exec_file.name), temp_source_file.name])
+                subprocess.call(["csc", "-out:{0}".format(temp_exec_file.name), temp_source_file.name])
             elif language_mode == 2:
-                subprocess.run(["javac", temp_source_file.name])
+                subprocess.call(["javac", temp_source_file.name])
 
             os.remove(temp_source_file.name)
 
