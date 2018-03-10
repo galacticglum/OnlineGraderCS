@@ -4,12 +4,14 @@ import subprocess
 import threading
 import tempfile
 import shutil
+import uuid
 
-from flask import Flask, url_for, redirect, render_template, request, abort, flash
+import flask_admin
+from flask import Flask, url_for, redirect, render_template, request, abort, flash, send_file
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy.event import listens_for
 from flask_security import Security, SQLAlchemyUserDatastore, UserMixin, RoleMixin, login_required, current_user
 from flask_security.utils import encrypt_password
-import flask_admin
 from flask_admin.contrib import sqla
 from flask_admin import helpers as admin_helpers
 from sqlalchemy.sql import func
@@ -20,6 +22,13 @@ application = Flask(__name__, instance_relative_config = True)
 application.config.from_object('config')
 application.config.from_pyfile('config.py')
 db = SQLAlchemy(application)
+
+# Create directory for file fields to use
+upload_file_path = os.path.join(os.path.dirname(__file__), 'files')
+try:
+    os.mkdir(upload_file_path)
+except OSError:
+    pass
 
 # Define models
 roles_users = db.Table(
@@ -147,6 +156,33 @@ class MyModelView(sqla.ModelView):
                 # login
                 return redirect(url_for('security.login', next=request.url))
 
+def generate_problem_file_name(object, file_data):
+    return 'problem_{0}'.format(uuid.uuid4().hex)
+
+class ProblemView(MyModelView):
+    form_overrides = {
+        'link': flask_admin.form.FileUploadField
+    }
+
+    form_args = {
+        'link' : {
+            'label' : 'File',
+            'base_path': upload_file_path,
+            'allow_overwrite': False,
+            'namegen': generate_problem_file_name
+        }
+    }
+
+# Delete hooks for models, delete files if models are getting deleted
+@listens_for(Problem, 'after_delete')
+def del_file(mapper, connection, target):
+    if target.path:
+        try:
+            os.remove(op.join(upload_file_path, target.link))
+        except OSError:
+            # Don't care if was not deleted because it does not exist
+            pass
+
 # Flask views
 @application.route('/')
 def index():
@@ -201,6 +237,23 @@ def write_test_run(expected_output, output, testcase_id, submission_id):
         test_run = TestRun(testcase_id=testcase_id, submission_id=submission_id, status=(1 if correct else -1))
         db.session.add(test_run)
         db.session.commit()
+
+@application.route('/problem/<int:problem_id>')
+@login_required
+def problem(problem_id):
+    problem = db.session.query(Problem).filter(Problem.id == problem_id).first()
+    if problem == None:
+        abort(404)
+        return
+
+    participation_query = db.session.query(ContestParticipation).filter(ContestParticipation.user_id == current_user.id) \
+        .filter(ContestParticipation.contest_id == problem.contest_id).first()
+
+    if participation_query == None:
+        abort(403)
+        return
+
+    return send_file(os.path.join(upload_file_path, problem.link))
 
 @application.route('/contest/<int:contest_id>', methods=['GET', 'POST'])
 @login_required
@@ -305,7 +358,7 @@ admin = flask_admin.Admin(
 admin.add_view(MyModelView(Role, db.session))
 admin.add_view(MyModelView(User, db.session))
 admin.add_view(MyModelView(Contest, db.session))
-admin.add_view(MyModelView(Problem, db.session))
+admin.add_view(ProblemView(Problem, db.session))
 admin.add_view(MyModelView(Testcase, db.session))
 
 # define a context processor for merging flask-admin's template context into the
