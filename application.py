@@ -253,7 +253,7 @@ def problem(problem_id):
         abort(403)
         return
 
-    return send_file(os.path.join(upload_file_path, problem.link))
+    return send_file(os.path.join(upload_file_path, problem.link), as_attachment=False)
 
 @application.route('/contest/<int:contest_id>', methods=['GET', 'POST'])
 @login_required
