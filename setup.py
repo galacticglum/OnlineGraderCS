@@ -5,7 +5,7 @@ Populate a small db with some example entries.
 import string
 import random
 
-from app import app, db, User, Role, user_datastore, encrypt_password
+from application import app, db, User, Role, user_datastore, encrypt_password
 
 db.drop_all()
 db.create_all()
