@@ -16,10 +16,10 @@ from sqlalchemy.sql import func
 from wtforms import Form, SelectField, FileField
 
 # Create Flask application
-app = Flask(__name__, instance_relative_config = True)
-app.config.from_object('config')
-app.config.from_pyfile('config.py')
-db = SQLAlchemy(app)
+application = Flask(__name__, instance_relative_config = True)
+application.config.from_object('config')
+application.config.from_pyfile('config.py')
+db = SQLAlchemy(application)
 
 # Define models
 roles_users = db.Table(
@@ -122,7 +122,7 @@ class TestRun(db.Model):
 
 # Setup Flask-Security
 user_datastore = SQLAlchemyUserDatastore(db, User, Role)
-security = Security(app, user_datastore)
+security = Security(application, user_datastore)
 
 # Create customized model view class
 class MyModelView(sqla.ModelView):
@@ -148,7 +148,7 @@ class MyModelView(sqla.ModelView):
                 return redirect(url_for('security.login', next=request.url))
 
 # Flask views
-@app.route('/')
+@application.route('/')
 def index():
     contests = None
     if current_user.is_authenticated:
@@ -161,7 +161,7 @@ def index():
         
     return render_template('index.html', contests=contests)
 
-@app.route('/rules')
+@application.route('/rules')
 def rules():
     return render_template('rules.html')
 
@@ -179,7 +179,7 @@ def run_testcase_compiled(input_data, expected_output, testcase_id, submission_i
     elif language_mode == 2:
         command = ["java", "-classpath", "{0}".format(exec_filepath), "Main"]
 
-    output = subprocess.check_output(command, input=input_data, timeout=app.config['SCRIPT_RUN_TIMEOUT']).decode('utf-8')
+    output = subprocess.check_output(command, input=input_data, timeout=application.config['SCRIPT_RUN_TIMEOUT']).decode('utf-8')
     write_test_run(expected_output, output, testcase_id, submission_id)
 
     if do_delete:
@@ -192,17 +192,17 @@ def run_testcase_compiled(input_data, expected_output, testcase_id, submission_i
 def run_testcase_python(source_code, input_data, expected_output, testcase_id, submission_id, language_mode):
     if language_mode != 0: return
 
-    output = subprocess.check_output(["python", "-c", source_code], input=input_data, timeout=app.config['SCRIPT_RUN_TIMEOUT']).decode('utf-8')
+    output = subprocess.check_output(["python", "-c", source_code], input=input_data, timeout=application.config['SCRIPT_RUN_TIMEOUT']).decode('utf-8')
     write_test_run(expected_output, output, testcase_id, submission_id)
 
 def write_test_run(expected_output, output, testcase_id, submission_id):
-    with app.app_context():
+    with application.app_context():
         correct = Testcase.matches(expected_output, output.splitlines())
         test_run = TestRun(testcase_id=testcase_id, submission_id=submission_id, status=(1 if correct else -1))
         db.session.add(test_run)
         db.session.commit()
 
-@app.route('/contest/<int:contest_id>', methods=['GET', 'POST'])
+@application.route('/contest/<int:contest_id>', methods=['GET', 'POST'])
 @login_required
 def contest(contest_id):
     form = SubmissionForm(request.form)
@@ -295,7 +295,7 @@ def contest(contest_id):
 
 # Create admin
 admin = flask_admin.Admin(
-    app,
+    application,
     'Dashboard',
     base_template='my_master.html',
     template_mode='bootstrap3',
@@ -311,7 +311,7 @@ admin.add_view(MyModelView(Testcase, db.session))
 # define a context processor for merging flask-admin's template context into the
 # flask-security and app views.
 @security.context_processor
-@app.context_processor
+@application.context_processor
 def context_processor():
     return dict(
         admin_base_template=admin.base_template,
@@ -322,4 +322,4 @@ def context_processor():
 
 if __name__ == '__main__':
     # Start app
-    app.run(debug=True)
+    application.run(debug=True)

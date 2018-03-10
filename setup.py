@@ -5,12 +5,12 @@ Populate a small db with some example entries.
 import string
 import random
 
-from application import app, db, User, Role, user_datastore, encrypt_password
+from application import application, db, User, Role, user_datastore, encrypt_password
 
 db.drop_all()
 db.create_all()
 
-with app.app_context():
+with application.app_context():
     user_role = Role(name='user')
     super_user_role = Role(name='superuser')
     db.session.add(user_role)
