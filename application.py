@@ -273,6 +273,11 @@ def write_test_run(expected_output, output, testcase_id, submission_id):
         correct = Testcase.matches(expected_output, output.splitlines())
         test_run = TestRun(testcase_id=testcase_id, submission_id=submission_id, status=(1 if correct else -1))
         db.session.add(test_run)
+
+        submission = db.session.query(Submission).filter(Submission.id == submission_id).first()
+        problem = db.session.query(Problem).filter(Problem.id == submission.problem_id).first()
+        submission.score = problem.total_points if correct else 0
+
         db.session.commit()
 
 @application.route('/problem/<int:problem_id>')
@@ -357,7 +362,7 @@ def contest(contest_id):
             
             compile_thread.start()
 
-        return redirect(url_for('contest', contest_id=contest_id))
+        return redirect(url_for('submission', submission_id=submission.id))
     else:
         # Check if the contest has expired or if it hasn't started yet
         if not contest.is_running():
@@ -381,7 +386,18 @@ def contest(contest_id):
             contest_participation = participation_query.first()
 
         time_left = contest_participation.join_time + datetime.timedelta(minutes=contest.duration_minutes) - datetime.datetime.now()
-        return render_template('contest.html', contest=contest, time_left=time_left.total_seconds())
+
+        submissions = []
+        for problem in contest.problems:
+            for submission in db.session.query(Submission).filter(Submission.user_id == current_user.id and Submission.problem_id == problem.id).all():
+                submissions.append((problem, submission))
+
+        return render_template('contest.html', contest=contest, submissions=submissions, time_left=time_left.total_seconds())
+
+@application.route('/submission/<int:submission_id>')
+@login_required
+def submission(submission_id):
+    return 'hi'
 
 # Create admin
 admin = flask_admin.Admin(

@@ -4,6 +4,21 @@
 {% block head %}
 {{ super() }}
 <link rel="stylesheet" href="/static/css/index.css">
+<style>
+    .noselect {
+  -webkit-touch-callout: none; /* iOS Safari */
+    -webkit-user-select: none; /* Safari */
+     -khtml-user-select: none; /* Konqueror HTML */
+       -moz-user-select: none; /* Firefox */
+        -ms-user-select: none; /* Internet Explorer/Edge */
+            user-select: none; /* Non-prefixed version, currently
+                                  supported by Chrome and Opera */
+}
+
+.text-button {
+    cursor: pointer; text-decoration: none !important;
+}
+</style>
 {% endblock %}
 
 {% block page_name %}
@@ -79,6 +94,31 @@ Contest
                 </table>
             </div>
         </form>
+
+        <hr>
+        <a id="collapse-group" data-target="#submission-history" data-toggle="collapse" class="noselect text-button">
+            <h3>Submission History</h3>
+        </a>
+
+        <div class="table-responsive collapse" id="submission-history">         
+            <table class="table">
+                <thead>
+                <tr>
+                    <th>Problem</th>
+                    <th>Submission</th>
+                </tr>
+                </thead>
+                <tbody>
+                {# Submission is a tuple of problem and submission #}   
+                {% for submission in submissions %}
+                    <tr>
+                        <td>{{submission[0].name}}</td>
+                        <td><a href="{{url_for('submission', submission_id=submission[1].id)}}">#{{submission[1].id}}</a></td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
     </div>
 </div>
 {% endblock body %}
