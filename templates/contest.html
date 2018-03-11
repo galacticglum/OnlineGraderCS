@@ -5,14 +5,25 @@
 {{ super() }}
 <link rel="stylesheet" href="/static/css/index.css">
 <style>
-    .noselect {
-  -webkit-touch-callout: none; /* iOS Safari */
-    -webkit-user-select: none; /* Safari */
-     -khtml-user-select: none; /* Konqueror HTML */
-       -moz-user-select: none; /* Firefox */
-        -ms-user-select: none; /* Internet Explorer/Edge */
-            user-select: none; /* Non-prefixed version, currently
-                                  supported by Chrome and Opera */
+.noselect {
+  -webkit-touch-callout: none; 
+  -webkit-user-select: none; 
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none; 
+  user-select: none; 
+}
+
+.collapse-toggle:before {
+    font-family: 'Glyphicons Halflings'; 
+    content: "\e114";   
+    float: left;
+    color: grey;
+    padding-right: 10px;
+}
+
+.collapse-toggle.collapsed:before {
+    content: "\e080"; 
 }
 
 .text-button {
@@ -96,7 +107,7 @@ Contest
         </form>
 
         <hr>
-        <a id="collapse-group" data-target="#submission-history" data-toggle="collapse" class="noselect text-button">
+        <a id="collapse-group" data-target="#submission-history" data-toggle="collapse" class="noselect text-button collapse-toggle collapsed">
             <h3>Submission History</h3>
         </a>
 
