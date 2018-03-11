@@ -1,0 +1,34 @@
+{% extends 'admin/master.html' %}
+{% from "security/_macros.html" import render_field, render_field_with_errors, render_checkbox_field %}
+
+{% set navigation_bar = [
+    ('index', 'index', 'Home'),
+    ('rules', 'rules', 'Rules')
+] -%}
+
+{% set active_page = active_page|default('index') -%}
+
+{% block title %}
+{% if self.page_name() %} {% block page_name %}{% endblock %} -{% endif %} Online Grader 
+{% endblock %}
+
+{% block brand %}
+<a class="navbar-brand" href="{{ url_for('index') }}">Online Grader</a>
+{% endblock %}
+
+{% block main_menu %}
+<ul class="nav navbar-nav">
+    {% block main_menu_items %}
+        {% for href, id, caption in navigation_bar %}
+            <li{% if id == active_page %} class="active"{% endif %}>
+                <a href="{{ url_for(href|e) }}">{{ caption|e }}</a>
+            </li>
+        {% endfor %}
+    {% endblock %}
+    {% if current_user.is_authenticated and current_user.has_role('superuser') %}
+    <li>
+        <a href="/admin">Dashboard</a>
+    </li> 
+    {% endif %}
+</ul>
+{% endblock %}

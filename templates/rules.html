@@ -1,0 +1,96 @@
+{% extends '_layout.html' %} 
+{% set active_page = "rules" %} 
+{% block head %} 
+{{ super() }}
+<link rel="stylesheet" href="/static/css/rules.css">
+{% endblock %} 
+
+{% block tail %}
+<script src="/static/js/rules.js"></script> 
+{% endblock %}
+
+{% block page_name %} 
+Rules
+{% endblock %}
+
+{% block body %} 
+{{ super() }}
+<div class="row-fluid">
+    <div class="col-sm-8 col-sm-offset-2">
+        <a id="collapse-group" data-target="#contest" data-toggle="collapse" class="nounderline" style="cursor: pointer">
+            <h1>Contest Rules</h1>
+        </a>
+
+        <div class="collapse" id="contest">
+            <hr>
+            <h3>1. Implementation</h3>
+            <p>All input is from standard input and all output is from standard output. Programs submitted to the grader should
+                not read or write files.
+            </p>
+
+            <p>Outputs must exactly match the format specified in the problem. Prompts or additional output will render the
+                output invalid.
+            </p>
+
+            <br>
+            <h3>2. Submission</h3>
+            <p>The grader will accept up to 50 submissions per problem. Users may submit at most once per minute to any specific
+                problem.</p>
+
+            <br>
+            <h3>3. Resources, References, and Tools</h3>
+            <p>During the contest, contestants may use the internet for problem submissions and for reference consultation. Official
+                documentation sources are allowed, examples include:
+            </p>
+
+            <ul>
+                <li>
+                    <a href="https://docs.python.org/2/reference/index.html">Python 2 Documentation</a>
+                </li>
+                <li>
+                    <a href="https://docs.python.org/3/reference/index.html">Python 3 Documentation</a>
+                </li>
+            </ul>
+            <br>
+        </div>
+
+        <a id="collapse-group" data-target="#guidelines" data-toggle="collapse" class="nounderline" style="cursor: pointer">
+            <h1>Platform Usage Guidelines</h1>
+        </a>
+
+        <div class="collapse" id="guidelines">
+            <hr>
+            <h3>1. Implementation</h3>
+            <p>All input is from standard input and all output is from standard output. Programs submitted to the grader should
+                not read or write files.
+            </p>
+
+            <p>Outputs must exactly match the format specified in the problem. Prompts or additional output will render the
+                output invalid.
+            </p>
+
+            <br>
+            <h3>2. Submission</h3>
+            <p>The grader will accept up to 50 submissions per problem. Users may submit at most once per minute to any specific
+                problem.</p>
+
+            <br>
+            <h3>3. Resources, References, and Tools</h3>
+            <p>During a contest, contestants may use the internet for problem submissions and for reference consultation. Official
+                documentation sources are allowed, examples include:
+            </p>
+
+            <ul>
+                <li>
+                    <a href="https://docs.python.org/2/reference/index.html">Python 2 Documentation</a>
+                </li>
+                <li>
+                    <a href="https://docs.python.org/3/reference/index.html">Python 3 Documentation</a>
+                </li>
+            </ul>
+        </div>
+
+        <br>
+    </div>
+</div>
+{% endblock %}

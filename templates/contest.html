@@ -1,0 +1,175 @@
+{% extends '_layout.html' %}
+{% set active_page = "" %}
+
+{% block head %}
+{{ super() }}
+<link rel="stylesheet" href="/static/css/index.css">
+<style>
+.noselect {
+  -webkit-touch-callout: none; 
+  -webkit-user-select: none; 
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none; 
+  user-select: none; 
+}
+
+.collapse-toggle:before {
+    font-family: 'Glyphicons Halflings'; 
+    content: "\e114";   
+    float: left;
+    color: grey;
+    padding-right: 10px;
+}
+
+.collapse-toggle.collapsed:before {
+    content: "\e080"; 
+}
+
+.text-button {
+    cursor: pointer; text-decoration: none !important;
+}
+</style>
+{% endblock %}
+
+{% block page_name %}
+Contest
+{% endblock %}
+
+{% block body %}
+{{ super() }}
+<div class="row-fluid">
+    <div class="col-sm-8 col-sm-offset-2">
+        <h1>{{contest.name}}</h1>
+        <p id="clock"></p>
+        <div class="well">
+            <div class="table-responsive">         
+                <table class="table">
+                    <thead>
+                    <tr>
+                        <th>Problem</th>
+                        <th>Most Recent Submission</th>
+                        <th>Highest Scoring Submission</th>
+                        <th>Highest Score</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for problem in contest.problems %}
+                    <tr>
+                        <td><a href="{{url_for('problem', problem_id=problem.id)}}">{{ problem.name }}</a></td>
+                        <td>None</td>
+                        <td>None</td>
+                        <td>0 / {{problem.total_points}}</td>
+                    </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <hr>
+        <h3>Submit Solution</h3>
+        <form method="POST" enctype="multipart/form-data" action="">
+            <div class="table-responsive">
+                <table>
+                    <tr>
+                        <td>Problem</td>
+                        <td align="right">
+                            <select name="problem">
+                                {% for problem in contest.problems %}
+                                    <option value="{{problem.id}}">{{problem.name}}</option>
+                                {% endfor %}
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Language</td>
+                        <td align="right">
+                            <select name="language">
+                                <option value="0">Python</option>
+                                <option value="1">C#</option>
+                                <option value="2">Java</option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>File</td>
+                        <td align="right">
+                            <input type="file" name="file"/>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td></td>
+                        <td align="right" style="padding-left: 50px"><input class="btn btn-primary btn-sm" type="submit" value="Submit"/></td>
+                    </tr>
+                </table>
+            </div>
+        </form>
+
+        <hr>
+        <a id="collapse-group" data-target="#submission-history" data-toggle="collapse" class="noselect text-button collapse-toggle collapsed">
+            <h3>Submission History</h3>
+        </a>
+
+        <div class="table-responsive collapse" id="submission-history">         
+            <table class="table">
+                <thead>
+                <tr>
+                    <th>Problem</th>
+                    <th>Submission</th>
+                </tr>
+                </thead>
+                <tbody>
+                {# Submission is a tuple of problem and submission #}   
+                {% for submission in submissions %}
+                    <tr>
+                        <td>{{submission[0].name}}</td>
+                        <td><a href="{{url_for('submission', submission_id=submission[1].id)}}">#{{submission[1].id}}</a></td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock body %}
+
+{% block tail %}
+{{ super() }}
+<script>
+// Set the date we're counting down to
+var current_date = new Date();
+current_date.setSeconds(current_date.getSeconds() + {{time_left}});
+var countDownDate = current_date.getTime();
+
+function count_down(timer_interval) {
+    // Get todays date and time
+    var now = new Date().getTime();
+
+    // Find the distance between now an the count down date
+    var distance = countDownDate - now;
+
+    // Time calculations for days, hours, minutes and seconds
+    var days = Math.floor(distance / (1000 * 60 * 60 * 24));
+    var hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    var minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+    var seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+    // Display the result in the element with id="demo"
+    document.getElementById("clock").innerHTML = (days > 0 ? days + "d " : "") + (hours > 0 ? hours + "h " : "")
+    + (minutes > 0 ? minutes + "m " : "") + (seconds > 0 ? seconds + "s " : "") + " left";
+
+    // If the count down is finished, write some text 
+    if (distance < 0) {
+        clearInterval(timer_interval);
+        document.getElementById("clock").innerHTML = "Time's up!";
+    }
+}
+
+count_down();
+interval = setInterval(function() {
+    count_down(interval)
+}, 1000);
+
+</script>
+{% endblock %}

@@ -104,10 +104,8 @@ venv.bak/
 # mypy
 .mypy_cache/
 
-# instance has secret config entries
-instance/
 
-aws-env/
+!instance/
 
 # Elastic Beanstalk Files
 
