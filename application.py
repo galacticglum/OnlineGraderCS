@@ -18,10 +18,12 @@ from flask_security.utils import encrypt_password
 from flask_admin.contrib import sqla
 from flask_admin import helpers as admin_helpers
 from sqlalchemy.sql import func
-from wtforms import Form, SelectField, FileField, StringField, TextField
+from wtforms import Form, SelectField, StringField, TextField, SubmitField
 from wtforms.fields.html5 import EmailField
 from wtforms.widgets import FileInput
 from werkzeug.datastructures import FileStorage
+from flask_wtf.file import FileRequired, FileField
+from flask_wtf import FlaskForm
 
 # Create Flask application
 application = Flask(__name__, instance_relative_config = True)
@@ -269,10 +271,12 @@ def index():
 def rules():
     return render_template('rules.html')
 
-class SubmissionForm(Form):
-    problem = SelectField('problem')
-    language = SelectField('language')
-    file = FileField('file')
+class SubmissionForm(FlaskForm):
+    problem = SelectField('Problem', coerce=int, validators=[wtforms.validators.Required()])
+    language = SelectField('Language', choices=[('0', 'Python'), ('1', 'C#'), ('2', 'Java')], validators=[wtforms.validators.Required()])
+    file = FileField('File', [FileRequired()])
+    submit = SubmitField('Submit')
+
 
 def run_subprocess_safe(args, input_data):
     try:
@@ -345,17 +349,18 @@ def problem(problem_id):
 @application.route('/contest/<int:contest_id>', methods=['GET', 'POST'])
 @login_required
 def contest(contest_id):
-    form = SubmissionForm(request.form)
+    form = SubmissionForm()
     contest = db.session.query(Contest).filter(Contest.id == contest_id).first()
+
+    form.problem.choices = [(problem.id, problem.name) for problem in contest.problems]
 
     # If the contest doesn't exist, we show a 404 error.
     if contest == None:
         abort(404)
         return
-
-    if request.method == 'POST':
+        
+    if form.validate_on_submit():
         source_code = request.files['file'].read().decode('utf-8')
-
         language_mode = int(form.language.data)
         submission = Submission(user_id=current_user.id, problem_id=form.problem.data, time=datetime.datetime.now(), code=source_code, score=0, language=language_mode)
         db.session.add(submission)
@@ -437,7 +442,7 @@ def contest(contest_id):
             for submission in db.session.query(Submission).filter(Submission.user_id == current_user.id, Submission.problem_id == problem.id).all():
                 submissions.append((problem, submission))
 
-        return render_template('contest.html', contest=contest, submissions=submissions, time_left=time_left.total_seconds())
+        return render_template('contest.html', contest=contest, submissions=submissions, time_left=time_left.total_seconds(), submission_form=form)
 
 @application.route('/submission/<int:submission_id>')
 @login_required

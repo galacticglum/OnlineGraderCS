@@ -44,49 +44,20 @@ Contest
 
         <hr>
         <h3>Submit Solution</h3>
-        <form method="POST" enctype="multipart/form-data" action="">
-            <div class="table-responsive">
-                <table>
-                    <tr>
-                        <td>Problem</td>
-                        <td align="right">
-                            <select name="problem">
-                                {% for problem in contest.problems %}
-                                    <option value="{{problem.id}}">{{problem.name}}</option>
-                                {% endfor %}
-                            </select>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>Language</td>
-                        <td align="right">
-                            <select name="language">
-                                <option value="0">Python</option>
-                                <option value="1">C#</option>
-                                <option value="2">Java</option>
-                            </select>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>File</td>
-                        <td align="right">
-                            <input type="file" name="file"/>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td></td>
-                        <td align="right" style="padding-left: 50px"><input class="btn btn-primary btn-sm" type="submit" value="Submit"/></td>
-                    </tr>
-                </table>
-            </div>
+        <form action="" method="POST" enctype="multipart/form-data">
+            {{ render_field_with_errors(submission_form.problem) }}
+            {{ render_field_with_errors(submission_form.language) }}
+            {{ render_field_with_label(submission_form.file, class="input") }}
+            {{ render_field(submission_form.submit, class="btn btn-primary") }}
+            {{ submission_form.csrf_token }}
         </form>
 
         <hr>
-        <a id="collapse-group" data-target="#submission-history" data-toggle="collapse" class="noselect text-button collapse-toggle collapsed">
+        <a id="collapse-group" data-target="#submission-history" data-toggle="collapse" class="noselect text-button collapse-toggle">
             <h3>Submission History</h3>
         </a>
 
-        <div class="table-responsive collapse" id="submission-history">         
+        <div class="table-responsive collapse in" id="submission-history">         
             <table class="table">
                 <thead>
                 <tr>
