@@ -13,11 +13,13 @@ import wtforms
 from flask import Flask, url_for, redirect, render_template, request, abort, flash, send_file
 from flask_sqlalchemy import SQLAlchemy
 from flask_security import Security, SQLAlchemyUserDatastore, UserMixin, RoleMixin, login_required, current_user
+from flask_security.forms import RegisterForm, LoginForm
 from flask_security.utils import encrypt_password
 from flask_admin.contrib import sqla
 from flask_admin import helpers as admin_helpers
 from sqlalchemy.sql import func
-from wtforms import Form, SelectField, FileField, StringField
+from wtforms import Form, SelectField, FileField, StringField, TextField
+from wtforms.fields.html5 import EmailField
 from wtforms.widgets import FileInput
 from werkzeug.datastructures import FileStorage
 
@@ -119,16 +121,45 @@ class Submission(db.Model):
     problem_id = db.Column(db.Integer)
     time = db.Column(db.DateTime)
     code = db.Column(db.Text)
+    language = db.Column(db.Integer)
     score = db.Column(db.Integer)
+
+    def get_language_name(self):
+        if self.language == 0:
+            return 'Python'
+        
+        if self.language == 1:
+            return 'C#'
+
+        if self.language == 2:
+            return 'Java'
 
 class TestRun(db.Model):
     testcase_id = db.Column(db.Integer, primary_key=True)
     submission_id = db.Column(db.Integer, primary_key=True)
     status = db.Column(db.Integer)
 
+    def get_status_name(self):
+        if self.status == 1:
+            return "Correct"
+
+        if self.status == 0:
+            return "Pending Judgment"
+
+        if self.status == -1:
+            return "Failed"
+
+class ExtendedRegisterForm(RegisterForm):
+    first_name = TextField('First Name', [wtforms.validators.Required()])
+    last_name = TextField('Last Name', [wtforms.validators.Required()])
+    email = EmailField('Email Address', [wtforms.validators.Required(), wtforms.validators.Email()])
+
+class ExtendedLoginForm(LoginForm):
+    email = EmailField('Email Address', [wtforms.validators.Required(), wtforms.validators.Email()])
+
 # Setup Flask-Security
 user_datastore = SQLAlchemyUserDatastore(db, User, Role)
-security = Security(application, user_datastore)
+security = Security(application, user_datastore, register_form=ExtendedRegisterForm, login_form=ExtendedLoginForm)
 
 # Create customized model view class
 class MyModelView(sqla.ModelView):
@@ -152,9 +183,6 @@ class MyModelView(sqla.ModelView):
             else:
                 # login
                 return redirect(url_for('security.login', next=request.url))
-
-def generate_problem_file_name(object, file_data):
-    return 'problem_{0}'.format(uuid.uuid4().hex)
 
 class BlobUploadField(StringField):
     widget = FileInput()
@@ -311,16 +339,16 @@ def contest(contest_id):
     if request.method == 'POST':
         source_code = request.files['file'].read().decode('utf-8')
 
-        submission = Submission(user_id=current_user.id, problem_id=form.problem.data, time=datetime.datetime.now(), code=source_code, score=0)
+        language_mode = int(form.language.data)
+        submission = Submission(user_id=current_user.id, problem_id=form.problem.data, time=datetime.datetime.now(), code=source_code, score=0, language=language_mode)
         db.session.add(submission)
         db.session.commit()
 
         problem = db.session.query(Problem).filter(Problem.id == form.problem.data).first()
 
         temp_dir = tempfile.mkdtemp()
-        language_mode = int(form.language.data)
-            
         temp_exec_file = None
+
         if language_mode != 0:
             temp_source_file = None
             temp_exec_file = None
@@ -389,7 +417,7 @@ def contest(contest_id):
 
         submissions = []
         for problem in contest.problems:
-            for submission in db.session.query(Submission).filter(Submission.user_id == current_user.id and Submission.problem_id == problem.id).all():
+            for submission in db.session.query(Submission).filter(Submission.user_id == current_user.id, Submission.problem_id == problem.id).all():
                 submissions.append((problem, submission))
 
         return render_template('contest.html', contest=contest, submissions=submissions, time_left=time_left.total_seconds())
@@ -397,7 +425,24 @@ def contest(contest_id):
 @application.route('/submission/<int:submission_id>')
 @login_required
 def submission(submission_id):
-    return 'hi'
+    submission = db.session.query(Submission).filter(Submission.id == submission_id).first()
+    if submission == None:
+        abort(404)
+        return
+
+    if submission.user_id != current_user.id:
+        abort(403)
+        return
+ 
+    problem = db.session.query(Problem).filter(Problem.id == submission.problem_id).first()
+    contest = db.session.query(Contest).filter(Contest.id == problem.contest_id).first()
+
+    tests = []
+    for testcase in problem.testcases:
+        test_run = db.session.query(TestRun).filter(TestRun.testcase_id == testcase.id, TestRun.submission_id == submission_id).first()
+        tests.append((testcase, test_run))
+
+    return render_template('submission.html', submission=submission, contest=contest, problem=problem, tests=tests)
 
 # Create admin
 admin = flask_admin.Admin(

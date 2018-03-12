@@ -19,7 +19,7 @@ with application.app_context():
 
     test_user = user_datastore.create_user(
         first_name='Admin',
-        email='admin',
+        email='admin@email.com',
         password=encrypt_password('admin'),
         roles=[user_role, super_user_role]
     )

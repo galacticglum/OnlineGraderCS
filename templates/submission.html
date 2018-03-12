@@ -1,0 +1,83 @@
+{% extends '_layout.html' %} 
+{% set active_page = "" %} 
+
+{% block head %}
+{{super()}}
+<link rel="stylesheet" href="/static/css/contest.css">
+
+<style>
+tr.spaceUnder>td {
+  padding-bottom: 1em;
+}
+</style>
+{% endblock %}
+
+{% block page_name %} 
+Submission
+{% endblock %}
+
+{% block body %} 
+{{ super() }}
+<div class="row-fluid">
+    <div class="col-sm-8 col-sm-offset-2">
+        <hr style="clear: both; visibility: hidden; margin-top: 0px;">
+        <a data-target="#submission-info" data-toggle="collapse" class="noselect text-button collapse-toggle">
+            <h3 class="collapsible">{{contest.name}}: {{problem.name}}</h3>
+        </a>
+
+        <div class="table-responsive collapse in" id="submission-info">
+            <table border="0">
+                <tbody>
+                    <tr>
+                        <td scope="col" width="144"><span class="style4"><span class="style5">Submission ID:</span> &nbsp;</span></td>
+                        <td>{{submission.id}}</td>
+                    </tr>
+
+                    <tr>
+                        <td scope="col"><span class="style6">Submission time: &nbsp;</span><br /></td>
+                        <td>{{submission.time}}</td>
+
+                    </tr>
+                    <tr>
+                        <td scope="col"><span class="style6">Contest: &nbsp;</span><br /></td>
+                        <td>{{contest.name}}</td>
+                    </tr>
+                    <tr>
+                        <td scope="col"><span class="style6">Problem: &nbsp;</span></td>
+                        <td>{{problem.name}}</td>
+                    </tr>
+                    <tr>
+                        <td scope="col"><span class="style6">Language: &nbsp;</span></td>
+                        <td>{{submission.get_language_name()}}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <hr>
+        <h3>Grading</h3>
+        <div class="table-responsive">         
+            <table class="table">
+                <tbody>
+                    {% for test in tests %}
+                        {% if test[1] == None %}
+                            <tr class="active">
+                                <td>{{test[0].name}}</td>
+                                <td>None</td>
+                            </tr>                 
+                        {% else %}
+                            {% if test[1].status == 1 %}
+                                <tr class="success">
+                            {% else %}
+                                <tr class="danger">
+                            {% endif %}
+                            <td>{{test[0].name}}</td>
+                            <td>{{test[1].get_status_name()}}</td>
+                        </tr>
+                        {% endif %}
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
