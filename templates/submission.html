@@ -71,9 +71,9 @@ Submission
             <table class="table">
                 <tbody>
                     {% for test in tests %}
-                        <tr class="{{ get_test_run_status_html(test[1]) }}">
+                        <tr class="{{ get_test_run_status_html(test[1]) }}" id="outer_testrun_{{test[0].id}}">
                             <td><strong>{{test[0].name}}</strong></td>
-                            <td>
+                            <td id="testrun_{{test[0].id}}">
                                 {% if test[1] == None %}
                                     None
                                 {% else %}
@@ -87,4 +87,57 @@ Submission
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block tail %}
+{{ super() }}
+<script>
+
+var tries = 0;
+function update_results(timer_interval)
+{    
+    function get_test_run_status_html(status)
+    {
+        switch(status)
+        {
+            case 0:
+                return "active";
+            case 1:
+                return "success";
+            case -1:
+                return "danger";
+            case -2:
+                return "warning";
+        }
+    }
+
+    $.getJSON("{{ url_for('submission_results', submission_id=submission.id) }}",
+    function(data)
+    {
+        var stop = true;
+        $.each(data,
+        function(i, item)
+        {
+            stop = item.status != 0;
+
+            $('#testrun_' + item.id).text(item.status_name);
+            var outer_testrun_element = $('#outer_testrun_' + item.id);
+
+            outer_testrun_element.removeClass();
+            outer_testrun_element.addClass(get_test_run_status_html(item.status));
+        });
+    });
+
+    if(++tries >= 30 || stop)
+    {
+        clearInterval(timer_interval);
+    }
+}
+
+interval = setInterval(function()
+{
+    update_results(interval);
+}, 1000);
+
+</script>
 {% endblock %}

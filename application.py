@@ -10,7 +10,7 @@ import uuid
 import flask_admin
 import wtforms
 
-from flask import Flask, url_for, redirect, render_template, request, abort, flash, send_file
+from flask import Flask, url_for, redirect, render_template, request, abort, flash, send_file, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_security import Security, SQLAlchemyUserDatastore, UserMixin, RoleMixin, login_required, current_user
 from flask_security.forms import RegisterForm, LoginForm
@@ -460,6 +460,32 @@ def submission(submission_id):
         tests.append((testcase, test_run))
 
     return render_template('submission.html', submission=submission, contest=contest, problem=problem, tests=tests)
+
+@application.route('/submission_results/<int:submission_id>')
+@login_required
+def submission_results(submission_id):
+    submission = db.session.query(Submission).filter(Submission.id == submission_id).first()
+    if submission == None:
+        abort(404)
+        return
+
+    if submission.user_id != current_user.id:
+        abort(403)
+        return
+ 
+    problem = db.session.query(Problem).filter(Problem.id == submission.problem_id).first()
+    contest = db.session.query(Contest).filter(Contest.id == problem.contest_id).first()
+
+    tests = []
+    for testcase in problem.testcases:
+        test_run = db.session.query(TestRun).filter(TestRun.testcase_id == testcase.id, TestRun.submission_id == submission_id).first()
+        result_object = {}
+        result_object['id'] = testcase.id
+        result_object['status'] = test_run.status if test_run != None else 0
+        result_object['status_name'] = 'None' if test_run == None else test_run.get_status_name()
+        tests.append(result_object)
+
+    return jsonify(tests)
 
 # Create admin
 admin = flask_admin.Admin(
