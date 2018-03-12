@@ -1,6 +1,18 @@
 {% extends '_layout.html' %} 
 {% set active_page = "" %} 
 
+{% macro get_test_run_status_html(test_run) -%}
+    {% if not test_run or test_run.status == 0 %}
+        active
+    {% elif test_run.status == 1%}
+        success
+    {% elif test_run.status == -1%}
+        danger
+    {% elif test_run.status == -2%}
+        warning
+    {% endif %}
+{%- endmacro %}
+
 {% block head %}
 {{super()}}
 <link rel="stylesheet" href="/static/css/contest.css">
@@ -59,21 +71,16 @@ Submission
             <table class="table">
                 <tbody>
                     {% for test in tests %}
-                        {% if test[1] == None %}
-                            <tr class="active">
-                                <td>{{test[0].name}}</td>
-                                <td>None</td>
-                            </tr>                 
-                        {% else %}
-                            {% if test[1].status == 1 %}
-                                <tr class="success">
-                            {% else %}
-                                <tr class="danger">
-                            {% endif %}
-                            <td>{{test[0].name}}</td>
-                            <td>{{test[1].get_status_name()}}</td>
-                        </tr>
-                        {% endif %}
+                        <tr class="{{ get_test_run_status_html(test[1]) }}">
+                            <td><strong>{{test[0].name}}</strong></td>
+                            <td>
+                                {% if test[1] == None %}
+                                    None
+                                {% else %}
+                                    {{test[1].get_status_name()}}
+                                {% endif %}
+                            </td>
+                        </tr>  
                     {% endfor %}
                 </tbody>
             </table>

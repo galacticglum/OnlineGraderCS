@@ -144,10 +144,13 @@ class TestRun(db.Model):
             return "Correct"
 
         if self.status == 0:
-            return "Pending Judgment"
+            return "Pending"
 
         if self.status == -1:
             return "Failed"
+
+        if self.status == -2:
+            return "Timeout"
 
 class ExtendedRegisterForm(RegisterForm):
     first_name = TextField('First Name', [wtforms.validators.Required()])
@@ -271,6 +274,16 @@ class SubmissionForm(Form):
     language = SelectField('language')
     file = FileField('file')
 
+def run_subprocess_safe(args, input_data):
+    try:
+        output = subprocess.check_output(args, input=input_data, timeout=application.config['SCRIPT_RUN_TIMEOUT']).decode('utf-8')
+        return output, 0
+    except subprocess.TimeoutExpired as _:
+        return None, -2
+    except:
+        return None, -1
+        
+
 def run_testcase_compiled(input_data, expected_output, testcase_id, submission_id, language_mode, exec_filepath, do_delete=False):
     if language_mode == 0: return
 
@@ -280,8 +293,8 @@ def run_testcase_compiled(input_data, expected_output, testcase_id, submission_i
     elif language_mode == 2:
         command = ["java", "-classpath", "{0}".format(exec_filepath), "Main"]
 
-    output = subprocess.check_output(command, input=input_data, timeout=application.config['SCRIPT_RUN_TIMEOUT']).decode('utf-8')
-    write_test_run(expected_output, output, testcase_id, submission_id)
+    output, comp_status = run_subprocess_safe(command, input_data)
+    write_test_run(expected_output, output, testcase_id, submission_id, comp_status)
 
     if do_delete:
         dir_path = exec_filepath
@@ -293,13 +306,17 @@ def run_testcase_compiled(input_data, expected_output, testcase_id, submission_i
 def run_testcase_python(source_code, input_data, expected_output, testcase_id, submission_id, language_mode):
     if language_mode != 0: return
 
-    output = subprocess.check_output(["python", "-c", source_code], input=input_data, timeout=application.config['SCRIPT_RUN_TIMEOUT']).decode('utf-8')
-    write_test_run(expected_output, output, testcase_id, submission_id)
+    output, comp_status = run_subprocess_safe(["python", "-c", source_code], input_data)
+    write_test_run(expected_output, output, testcase_id, submission_id, comp_status)
 
-def write_test_run(expected_output, output, testcase_id, submission_id):
+def write_test_run(expected_output, output, testcase_id, submission_id, comp_status):
     with application.app_context():
-        correct = Testcase.matches(expected_output, output.splitlines())
-        test_run = TestRun(testcase_id=testcase_id, submission_id=submission_id, status=(1 if correct else -1))
+        correct = False
+        if output != None:
+            correct = Testcase.matches(expected_output, output.splitlines())
+
+        status = comp_status if comp_status != 0 else (1 if correct else -1)
+        test_run = TestRun(testcase_id=testcase_id, submission_id=submission_id, status=status)
         db.session.add(test_run)
 
         submission = db.session.query(Submission).filter(Submission.id == submission_id).first()
