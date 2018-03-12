@@ -4,32 +4,7 @@
 {% block head %}
 {{ super() }}
 <link rel="stylesheet" href="/static/css/index.css">
-<style>
-.noselect {
-  -webkit-touch-callout: none; 
-  -webkit-user-select: none; 
-  -khtml-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none; 
-  user-select: none; 
-}
-
-.collapse-toggle:before {
-    font-family: 'Glyphicons Halflings'; 
-    content: "\e114";   
-    float: left;
-    color: grey;
-    padding-right: 10px;
-}
-
-.collapse-toggle.collapsed:before {
-    content: "\e080"; 
-}
-
-.text-button {
-    cursor: pointer; text-decoration: none !important;
-}
-</style>
+<link rel="stylesheet" href="/static/css/contest.css">
 {% endblock %}
 
 {% block page_name %}
@@ -117,6 +92,7 @@ Contest
                 <tr>
                     <th>Problem</th>
                     <th>Submission</th>
+                    <th>Language</th>
                 </tr>
                 </thead>
                 <tbody>
@@ -125,6 +101,7 @@ Contest
                     <tr>
                         <td>{{submission[0].name}}</td>
                         <td><a href="{{url_for('submission', submission_id=submission[1].id)}}">#{{submission[1].id}}</a></td>
+                        <td>{{submission[1].get_language_name()}}</td>
                     </tr>
                 {% endfor %}
                 </tbody>

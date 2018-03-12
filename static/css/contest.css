@@ -1,0 +1,24 @@
+.noselect {
+  -webkit-touch-callout: none; 
+  -webkit-user-select: none; 
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none; 
+  user-select: none; 
+}
+
+.collapse-toggle:before {
+    font-family: 'Glyphicons Halflings'; 
+    content: "\e114";   
+    float: left;
+    color: grey;
+    padding-right: 10px;
+}
+
+.collapse-toggle.collapsed:before {
+    content: "\e080"; 
+}
+
+.text-button {
+    cursor: pointer; text-decoration: none !important;
+}
