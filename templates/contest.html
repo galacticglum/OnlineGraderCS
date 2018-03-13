@@ -41,16 +41,20 @@ Contest
                 </table>
             </div>
         </div>
-
-        <hr>
-        <h3>Submit Solution</h3>
-        <form action="" method="POST" enctype="multipart/form-data">
-            {{ render_field_with_errors(submission_form.problem) }}
-            {{ render_field_with_errors(submission_form.language) }}
-            {{ render_field_with_label(submission_form.file, class="input") }}
-            {{ render_field(submission_form.submit, class="btn btn-primary") }}
-            {{ submission_form.csrf_token }}
-        </form>
+ 
+        {% if can_submit %}
+        <div id="submission">
+            <hr>
+            <h3>Submit Solution</h3>
+            <form action="" method="POST" enctype="multipart/form-data">
+                {{ render_field_with_errors(submission_form.problem) }}
+                {{ render_field_with_errors(submission_form.language) }}
+                {{ render_field_with_errors(submission_form.file, class="input") }}
+                {{ render_field(submission_form.submit, class="btn btn-primary") }}
+                {{ submission_form.csrf_token }}
+            </form>
+        </div>
+        {% endif %}
 
         <hr>
         <a id="collapse-group" data-target="#submission-history" data-toggle="collapse" class="noselect text-button collapse-toggle">
@@ -108,7 +112,9 @@ function count_down(timer_interval) {
     + (minutes > 0 ? minutes + "m " : "") + (seconds > 0 ? seconds + "s " : "") + " left";
 
     // If the count down is finished, write some text 
-    if (distance < 0) {
+    if (distance < 0)
+    {
+        $("#submission").hide();
         clearInterval(timer_interval);
         document.getElementById("clock").innerHTML = "Time's up!";
     }

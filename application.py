@@ -80,6 +80,9 @@ class Contest(db.Model):
     def is_running(self):
         return self.has_started() and not self.has_expired()
 
+    def has_duration_expired(self, contest_participation):
+        return datetime.datetime.now() > contest_participation.join_time + datetime.timedelta(minutes=self.duration_minutes)
+
     def __str__(self):
         return self.name
 
@@ -358,8 +361,15 @@ def contest(contest_id):
     if contest == None:
         abort(404)
         return
-        
+
+    participation_query = db.session.query(ContestParticipation).filter(ContestParticipation.user_id == current_user.id) \
+        .filter(ContestParticipation.contest_id == contest_id)
+
     if form.validate_on_submit():
+        if contest.has_duration_expired(participation_query.first()):
+            flash('Sorry, unable to submit.', 'error')
+            return redirect(url_for('contest', contest_id=contest_id))
+
         source_code = request.files['file'].read().decode('utf-8')
         language_mode = int(form.language.data)
         submission = Submission(user_id=current_user.id, problem_id=form.problem.data, time=datetime.datetime.now(), code=source_code, score=0, language=language_mode)
@@ -419,9 +429,6 @@ def contest(contest_id):
             flash('Sorry, the contest you are trying to join is closed.', 'error')
             return redirect(url_for('index'))
 
-        participation_query = db.session.query(ContestParticipation).filter(ContestParticipation.user_id == current_user.id) \
-            .filter(ContestParticipation.contest_id == contest_id)
-
         already_joined = participation_query.count() > 0
 
         if not already_joined:
@@ -442,7 +449,8 @@ def contest(contest_id):
             for submission in db.session.query(Submission).filter(Submission.user_id == current_user.id, Submission.problem_id == problem.id).all():
                 submissions.append((problem, submission))
 
-        return render_template('contest.html', contest=contest, submissions=submissions, time_left=time_left.total_seconds(), submission_form=form)
+        can_submit = not contest.has_duration_expired(participation_query.first())
+        return render_template('contest.html', contest=contest, submissions=submissions, time_left=time_left.total_seconds(), submission_form=form, can_submit=can_submit)
 
 @application.route('/submission/<int:submission_id>')
 @login_required
