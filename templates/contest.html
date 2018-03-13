@@ -27,6 +27,11 @@ Contest
     <div class="col-sm-8 col-sm-offset-2">
         <h1>{{contest.name}}</h1>
         <p id="clock"></p>
+        {% if current_user.is_authenticated and current_user.has_role('superuser') %}
+        <a class="btn btn-primary btn-sm" href="{{ url_for('scoreboard', contest_id=contest.id) }}">View Scoreboard</a>
+        <hr>
+        {% endif %}
+
         <div class="well">
             <div class="table-responsive">         
                 <table class="table">

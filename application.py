@@ -54,6 +54,9 @@ def get_total_score(contest_id, user_id):
 
     return total_score
 
+def get_user_full_name(user_id):
+    user = db.session.query(User).filter(User.id == user_id).first()
+    return (user.first_name if user.first_name else '') + (' ' + user.last_name if user.last_name else '')
 
 class Role(db.Model, RoleMixin):
     id = db.Column(db.Integer, primary_key=True)
@@ -347,12 +350,22 @@ def write_test_run(expected_output, output, testcase_id, submission_id, comp_sta
         test_run = TestRun(testcase_id=testcase_id, submission_id=submission_id, status=status)
         db.session.add(test_run)
 
-        submission = db.session.query(Submission).filter(Submission.id == submission_id).first()
+        submission = db.session.query(Submission).with_lockmode('update').filter(Submission.id == submission_id).first()
         problem = db.session.query(Problem).filter(Problem.id == submission.problem_id).first()
         testcase = db.session.query(Testcase).filter(Testcase.id == testcase_id).first()
-        submission.score = testcase.score_weight if correct else 0
 
-        db.session.commit()
+        tries = 0
+
+        # In case of a race condition or concurrent insert, we need to wait for the db to be unlocked.
+        while tries < 50:
+            try:
+                submission.score = submission.score + (testcase.score_weight if correct else 0)
+                db.session.commit()
+                break
+            except Exception as exec:
+                db.session.rollback()
+
+            tries += 1
 
 @application.route('/problem/<int:problem_id>')
 @login_required
@@ -477,13 +490,61 @@ def contest(contest_id):
             highest_scoring_submissions[problem] = db.session.query(Submission).filter(Submission.user_id == current_user.id, \
                 Submission.problem_id == problem.id).order_by(Submission.score.desc()).first()
 
-            for submission in db.session.query(Submission).filter(Submission.user_id == current_user.id, Submission.problem_id == problem.id).all():
+            for submission in db.session.query(Submission).filter(Submission.user_id == current_user.id, Submission.problem_id == problem.id) \
+                .order_by(Submission.time.desc()).all():
                 submissions.append((problem, submission))
 
         can_submit = not contest.has_duration_expired(participation_query.first())
         return render_template('contest.html', contest=contest, submissions=submissions, time_left=time_left.total_seconds(), 
             submission_form=form, can_submit=can_submit, most_recent_submissions=most_recent_submissions, 
             highest_scoring_submissions=highest_scoring_submissions)
+
+def get_scoreboard_results(contest_id):
+    participations = db.session.query(User, ContestParticipation).filter(ContestParticipation.contest_id == contest_id) \
+        .filter(User.id == ContestParticipation.user_id).all()
+
+    scores = []
+    for participation in participations:
+        total_score = get_total_score(contest_id, participation[0].id)
+        result_object = {}
+        result_object['user'] = get_user_full_name(participation[0].id)
+        result_object['total_score'] = total_score
+        scores.append(result_object)
+
+    return sorted(scores, reverse=True, key=lambda x: x['total_score'])
+
+@application.route('/scoreboard/<int:contest_id>')
+@login_required
+def scoreboard(contest_id):
+    if not current_user.has_role('superuser'):
+        abort(403)
+        return
+
+    contest = db.session.query(Contest).filter(Contest.id == contest_id).first()
+
+    # If the contest doesn't exist, we show a 404 error.
+    if contest == None:
+        abort(404)
+        return
+
+    return render_template('scoreboard.html', contest=contest, scores=get_scoreboard_results(contest_id))
+
+@application.route('/scoreboard/results/<int:contest_id>')
+@login_required
+def scoreboard_results(contest_id):
+    if not current_user.has_role('superuser'):
+        abort(403)
+        return
+
+    contest = db.session.query(Contest).filter(Contest.id == contest_id).first()
+
+    # If the contest doesn't exist, we show a 404 error.
+    if contest == None:
+        abort(404)
+        return
+
+    is_contest_closed = contest.has_expired()
+    return jsonify(scores=get_scoreboard_results(contest_id), closed=is_contest_closed)
 
 @application.route('/submission/<int:submission_id>')
 @login_required
@@ -507,7 +568,7 @@ def submission(submission_id):
 
     return render_template('submission.html', submission=submission, contest=contest, problem=problem, tests=tests)
 
-@application.route('/submission_results/<int:submission_id>')
+@application.route('/submission/results/<int:submission_id>')
 @login_required
 def submission_results(submission_id):
     submission = db.session.query(Submission).filter(Submission.id == submission_id).first()
@@ -559,7 +620,8 @@ def context_processor():
         h=admin_helpers,
         get_url=url_for,
         formatted_datetime=get_formatted_datetime,
-        get_total_score=get_total_score
+        get_total_score=get_total_score,
+        get_user_full_name=get_user_full_name
     )
 
 if __name__ == '__main__':

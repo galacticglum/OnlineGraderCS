@@ -1,0 +1,76 @@
+{% extends '_layout.html' %} 
+{% set active_page = "" %} 
+
+{% block page_name %} 
+Scoreboard
+{% endblock %}
+
+{% block body %} 
+{{ super() }}
+<div class="row-fluid">
+    <div class="col-sm-8 col-sm-offset-2">
+        <h3>Scoreboard: {{contest.name}}</h3>
+        <div class="well">
+            <div class="table-responsive">         
+                <table class="table">
+                    <thead>
+                    <tr>
+                        <th>Rank</th>
+                        <th>Name</th>
+                        <th>Score</th>
+                    </tr>
+                    </thead>
+                    <tbody id="scores">
+                    {% for score in scores %}
+                    <tr>
+                        <td>{{loop.index}}</td>
+                        <td>{{ score['user'] }}</td>
+                        <td>{{ score['total_score'] }}</td>
+                    </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>    
+    </div>
+</div>
+{% endblock %}
+
+{% block tail %}
+{{ super() }}
+<script>
+String.prototype.format = function() 
+{
+  a = this;
+  for (k in arguments) {
+    a = a.replace("{" + k + "}", arguments[k])
+  }
+  return a
+}
+
+function update_results(timer_interval)
+{    
+    $.getJSON("{{ url_for('scoreboard_results', contest_id=contest.id) }}",
+    function(data)
+    {
+        $("#scores").empty()
+
+        for (var i = 0; i < data.scores.length; i++)
+        {
+            $("#scores").append("<tr><td>" + (i + 1) + "</td><td>" + data.scores[i].user +"</td><td>" + data.scores[i].total_score + "</td></tr>")
+        }
+
+        if(data.closed)
+        {
+            clearInterval(timer_interval);
+        }
+    });
+}
+
+interval = setInterval(function()
+{
+    update_results(interval);
+}, 5000);
+
+</script>
+{% endblock %}
