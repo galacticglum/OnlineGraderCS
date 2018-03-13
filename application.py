@@ -41,6 +41,20 @@ roles_users = db.Table(
 def get_formatted_datetime(datetime):
     return datetime.strftime('%b %d %Y, %I:%M %p')
 
+def get_total_score(contest_id, user_id):
+    contest = db.session.query(Contest).filter(Contest.id == contest_id).first()
+
+    total_score = 0
+    for problem in contest.problems:
+        highest_scoring_submission = db.session.query(Submission).filter(Submission.user_id == user_id, \
+        Submission.problem_id == problem.id).order_by(Submission.score.desc()).first()
+
+        if highest_scoring_submission != None:
+            total_score += highest_scoring_submission.score
+
+    return total_score
+
+
 class Role(db.Model, RoleMixin):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(80), unique=True)
@@ -544,7 +558,8 @@ def context_processor():
         admin_view=admin.index_view,
         h=admin_helpers,
         get_url=url_for,
-        formatted_datetime=get_formatted_datetime
+        formatted_datetime=get_formatted_datetime,
+        get_total_score=get_total_score
     )
 
 if __name__ == '__main__':
