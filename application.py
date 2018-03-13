@@ -24,12 +24,20 @@ from wtforms.widgets import FileInput
 from werkzeug.datastructures import FileStorage
 from flask_wtf.file import FileRequired, FileField
 from flask_wtf import FlaskForm
+from sqlalchemy.event import listens_for
 
 # Create Flask application
 application = Flask(__name__, instance_relative_config = True)
 application.config.from_object('config')
 application.config.from_pyfile('config.py')
 db = SQLAlchemy(application)
+
+# Create directory for file fields to use
+upload_file_path = os.path.join(os.path.dirname(__file__), 'files')
+try:
+    os.mkdir(upload_file_path)
+except OSError:
+    pass
 
 # Define models
 roles_users = db.Table(
@@ -109,7 +117,7 @@ class Contest(db.Model):
 class Problem(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(255))
-    pdf_object = db.Column(db.LargeBinary)
+    pdf_link = db.Column(db.String(2083))
     total_points = db.Column(db.Integer)
     contest_id = db.Column(db.Integer, db.ForeignKey(Contest.id))
     contest = db.relationship('Contest', backref=db.backref('problems', lazy='dynamic'))
@@ -216,69 +224,34 @@ class MyModelView(sqla.ModelView):
                 # login
                 return redirect(url_for('security.login', next=request.url))
 
-class BlobUploadField(StringField):
-    widget = FileInput()
-
-    def __init__(self, label=None, allowed_extensions=None, size_field=None, filename_field=None, mimetype_field=None, **kwargs):
-        self.allowed_extensions = allowed_extensions
-        self.size_field = size_field
-        self.filename_field = filename_field
-        self.mimetype_field = mimetype_field
-        validators = [wtforms.validators.required()]
-
-        super(BlobUploadField, self).__init__(label, validators, **kwargs)
-
-    def is_file_allowed(self, filename):
-        """
-            Check if file extension is allowed.
-
-            :param filename:
-                File name to check
-        """
-        if not self.allowed_extensions:
-            return True
-
-        return ('.' in filename and
-                filename.rsplit('.', 1)[1].lower() in
-                map(lambda x: x.lower(), self.allowed_extensions))
-
-    def _is_uploaded_file(self, data):
-        return (data and isinstance(data, FileStorage) and data.filename)
-
-    def pre_validate(self, form):
-        super(BlobUploadField, self).pre_validate(form)
-        if self._is_uploaded_file(self.data) and not self.is_file_allowed(self.data.filename):
-            raise ValidationError(gettext('Invalid file extension'))
-
-    def process_formdata(self, valuelist):
-        if valuelist:
-            data = valuelist[0]
-            self.data = data
-
-    def populate_obj(self, obj, name):
-        if self._is_uploaded_file(self.data):
-
-            _blob = self.data.read()
-
-            setattr(obj, name, _blob)
-
-            if self.size_field:
-                setattr(obj, self.size_field, len(_blob))
-
-            if self.filename_field:
-                setattr(obj, self.filename_field, self.data.filename)
-
-            if self.mimetype_field:
-                setattr(obj, self.mimetype_field, self.data.content_type)
+def generate_problem_file_name(object, file_data):
+    return 'problem_{0}'.format(uuid.uuid4().hex)
 
 class ProblemView(MyModelView):
     column_list = ('name','contest','total_points')
+    form_overrides = {
+        'pdf_link': flask_admin.form.FileUploadField
+    }
 
-    form_extra_fields = {
-        'pdf_object': BlobUploadField(
-        label='File',
-        allowed_extensions=['pdf']
-    )}
+    form_args = {
+        'pdf_link' : {
+            'label' : 'File',
+            'base_path': upload_file_path,
+            'allow_overwrite': False,
+            'namegen': generate_problem_file_name,
+            'validators':[wtforms.validators.Required()]
+        }
+    }
+
+# Delete hooks for models, delete files if models are getting deleted
+@listens_for(Problem, 'after_delete')
+def del_file(mapper, connection, target):
+    if target.path:
+        try:
+            os.remove(op.join(upload_file_path, target.link))
+        except OSError:
+            # Don't care if was not deleted because it does not exist
+            pass
 
 # Flask views
 @application.route('/')
@@ -382,7 +355,7 @@ def problem(problem_id):
         abort(403)
         return
 
-    return send_file(io.BytesIO(problem.pdf_object), attachment_filename="problem{0}.pdf".format(problem.id), mimetype="application/pdf")
+    return send_file(os.path.join(upload_file_path, problem.pdf_link), attachment_filename="problem{0}.pdf".format(problem.id), mimetype="application/pdf")
 
 @application.route('/contest/<int:contest_id>', methods=['GET', 'POST'])
 @login_required

@@ -108,6 +108,7 @@ venv.bak/
 instance/
 
 aws-env/
+files/
 
 # Elastic Beanstalk Files
 
