@@ -11,6 +11,16 @@
 Contest
 {% endblock %}
 
+{% macro display_submission(submission) %}
+    {% if submission != None %}
+        <a href="{{url_for('submission', submission_id=submission.id)}}">
+            {{submission}}
+        </a>
+    {% else %}
+        None
+    {% endif %}
+{% endmacro %}
+
 {% block body %}
 {{ super() }}
 <div class="row-fluid">
@@ -32,9 +42,15 @@ Contest
                     {% for problem in contest.problems %}
                     <tr>
                         <td><a href="{{url_for('problem', problem_id=problem.id)}}">{{ problem.name }}</a></td>
-                        <td>None</td>
-                        <td>None</td>
-                        <td>0 / {{problem.total_points}}</td>
+                        <td>{{ display_submission(most_recent_submissions[problem]) }}</td>
+                        <td>{{ display_submission(highest_scoring_submissions[problem]) }}</td>
+                        <td>
+                            {% if highest_scoring_submissions[problem] != None %}
+                                {{ highest_scoring_submissions[problem].score }} / {{problem.total_points}}
+                            {% else %}
+                                None
+                            {% endif %}
+                        </td>
                     </tr>
                     {% endfor %}
                     </tbody>
@@ -75,7 +91,7 @@ Contest
                 {% for submission in submissions %}
                     <tr>
                         <td>{{submission[0].name}}</td>
-                        <td><a href="{{url_for('submission', submission_id=submission[1].id)}}">#{{submission[1].id}}</a></td>
+                        <td><a href="{{url_for('submission', submission_id=submission[1].id)}}">{{submission[1]}}</a></td>
                         <td>{{submission[1].get_language_name()}}</td>
                     </tr>
                 {% endfor %}

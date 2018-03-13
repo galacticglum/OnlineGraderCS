@@ -38,6 +38,9 @@ roles_users = db.Table(
     db.Column('role_id', db.Integer, db.ForeignKey('role.id'))
 )
 
+def get_formatted_datetime(datetime):
+    return datetime.strftime('%b %d %Y, %I:%M %p')
+
 class Role(db.Model, RoleMixin):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(80), unique=True)
@@ -102,6 +105,7 @@ class Testcase(db.Model):
     name = db.Column(db.String(255))
     input_data = db.Column(db.Text)
     output_data = db.Column(db.Text)
+    score_weight = db.Column(db.Integer)
     problem_id = db.Column(db.Integer, db.ForeignKey(Problem.id))
     problem = db.relationship('Problem', backref=db.backref('testcases', lazy='dynamic'))
 
@@ -138,6 +142,9 @@ class Submission(db.Model):
 
         if self.language == 2:
             return 'Java'
+
+    def __str__(self):
+        return '#{0} at {1}'.format(self.id, get_formatted_datetime(self.time))
 
 class TestRun(db.Model):
     testcase_id = db.Column(db.Integer, primary_key=True)
@@ -328,7 +335,8 @@ def write_test_run(expected_output, output, testcase_id, submission_id, comp_sta
 
         submission = db.session.query(Submission).filter(Submission.id == submission_id).first()
         problem = db.session.query(Problem).filter(Problem.id == submission.problem_id).first()
-        submission.score = problem.total_points if correct else 0
+        testcase = db.session.query(Testcase).filter(Testcase.id == testcase_id).first()
+        submission.score = testcase.score_weight if correct else 0
 
         db.session.commit()
 
@@ -352,15 +360,15 @@ def problem(problem_id):
 @application.route('/contest/<int:contest_id>', methods=['GET', 'POST'])
 @login_required
 def contest(contest_id):
-    form = SubmissionForm()
     contest = db.session.query(Contest).filter(Contest.id == contest_id).first()
-
-    form.problem.choices = [(problem.id, problem.name) for problem in contest.problems]
 
     # If the contest doesn't exist, we show a 404 error.
     if contest == None:
         abort(404)
         return
+        
+    form = SubmissionForm()
+    form.problem.choices = [(problem.id, problem.name) for problem in contest.problems]
 
     participation_query = db.session.query(ContestParticipation).filter(ContestParticipation.user_id == current_user.id) \
         .filter(ContestParticipation.contest_id == contest_id)
@@ -445,12 +453,23 @@ def contest(contest_id):
         time_left = contest_participation.join_time + datetime.timedelta(minutes=contest.duration_minutes) - datetime.datetime.now()
 
         submissions = []
+        most_recent_submissions = {}
+        highest_scoring_submissions = {}
+
         for problem in contest.problems:
+            most_recent_submissions[problem] = db.session.query(Submission).filter(Submission.user_id == current_user.id, \
+                Submission.problem_id == problem.id).order_by(Submission.time.desc()).first()
+
+            highest_scoring_submissions[problem] = db.session.query(Submission).filter(Submission.user_id == current_user.id, \
+                Submission.problem_id == problem.id).order_by(Submission.score.desc()).first()
+
             for submission in db.session.query(Submission).filter(Submission.user_id == current_user.id, Submission.problem_id == problem.id).all():
                 submissions.append((problem, submission))
 
         can_submit = not contest.has_duration_expired(participation_query.first())
-        return render_template('contest.html', contest=contest, submissions=submissions, time_left=time_left.total_seconds(), submission_form=form, can_submit=can_submit)
+        return render_template('contest.html', contest=contest, submissions=submissions, time_left=time_left.total_seconds(), 
+            submission_form=form, can_submit=can_submit, most_recent_submissions=most_recent_submissions, 
+            highest_scoring_submissions=highest_scoring_submissions)
 
 @application.route('/submission/<int:submission_id>')
 @login_required
@@ -525,6 +544,7 @@ def context_processor():
         admin_view=admin.index_view,
         h=admin_helpers,
         get_url=url_for,
+        formatted_datetime=get_formatted_datetime
     )
 
 if __name__ == '__main__':

@@ -42,8 +42,8 @@ Home
                     {% if contest.is_running() %}
                     <tr>
                         <td>{{ contest.name }}</td>
-                        <td>{{ contest.start_time }}</td>
-                        <td>{{ contest.end_time }}</td>
+                        <td>{{ formatted_datetime(contest.start_time) }}</td>
+                        <td>{{ formatted_datetime(contest.end_time) }}</td>
                         <td class="text-center"><a class="btn btn-success btn-sm" href="/contest/{{contest.id}}">Enter</a></td>
                     </tr>
                     {% endif %}
