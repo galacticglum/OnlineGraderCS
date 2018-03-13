@@ -378,7 +378,7 @@ def contest(contest_id):
             flash('Sorry, unable to submit.', 'error')
             return redirect(url_for('contest', contest_id=contest_id))
 
-        source_code = request.files['file'].read().decode('utf-8')
+        source_code = request.files['file'].read().decode('utf-8-sig')
         language_mode = int(form.language.data)
         submission = Submission(user_id=current_user.id, problem_id=form.problem.data, time=datetime.datetime.now(), code=source_code, score=0, language=language_mode)
         db.session.add(submission)
