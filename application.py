@@ -64,7 +64,15 @@ def get_total_score(contest_id, user_id):
 
 def get_user_full_name(user_id):
     user = db.session.query(User).filter(User.id == user_id).first()
+    if user == None: return '<None: id={0}>'.format(user_id)
+
     return (user.first_name if user.first_name else '') + (' ' + user.last_name if user.last_name else '')
+
+def get_problem_name(problem_id):
+    problem = db.session.query(Problem).filter(Problem.id == problem_id).first()
+    if problem == None: return '<None: id={0}>'.format(problem_id)
+
+    return problem.name
 
 class Role(db.Model, RoleMixin):
     id = db.Column(db.Integer, primary_key=True)
@@ -252,7 +260,10 @@ class SubmissionView(MyModelView):
         }
     }
 
-    column_formatters = dict(language=lambda v, c, m, p: m.get_language_name())
+    column_labels = dict(user_id='User', problem_id='Problem')
+    column_formatters = dict(language=lambda v, c, m, p: m.get_language_name(), 
+        user_id=lambda v, c, m, p: get_user_full_name(m.user_id),
+        problem_id=lambda v, c, m, p: get_problem_name(m.problem_id))
 
     can_create = False
 
