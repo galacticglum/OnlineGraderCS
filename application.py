@@ -243,6 +243,19 @@ class ProblemView(MyModelView):
         }
     }
 
+class SubmissionView(MyModelView):
+    column_list = ('user_id', 'problem_id', 'time', 'language', 'score')
+    form_widget_args = {
+        'code' : {
+            'readonly': True,
+            'rows': 25
+        }
+    }
+
+    column_formatters = dict(language=lambda v, c, m, p: m.get_language_name())
+
+    can_create = False
+
 # Delete hooks for models, delete files if models are getting deleted
 @listens_for(Problem, 'after_delete')
 def del_file(mapper, connection, target):
@@ -581,6 +594,7 @@ admin.add_view(MyModelView(User, db.session))
 admin.add_view(MyModelView(Contest, db.session))
 admin.add_view(ProblemView(Problem, db.session))
 admin.add_view(MyModelView(Testcase, db.session))
+admin.add_view(SubmissionView(Submission, db.session))
 
 # define a context processor for merging flask-admin's template context into the
 # flask-security and app views.
