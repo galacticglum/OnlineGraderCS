@@ -10,7 +10,7 @@ import uuid
 import flask_admin
 import wtforms
 
-from flask import Flask, url_for, redirect, render_template, request, abort, flash, send_file, jsonify
+from flask import Flask, url_for, redirect, render_template, request, abort, flash, send_file, send_from_directory, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_security import Security, SQLAlchemyUserDatastore, UserMixin, RoleMixin, login_required, current_user
 from flask_security.forms import RegisterForm, LoginForm
@@ -590,6 +590,10 @@ def submission_results(submission_id):
         tests.append(result_object)
 
     return jsonify(tests)
+
+@application.route('/favicon.ico')
+def favicon():
+    return send_from_directory(os.path.join(application.root_path, 'static'), 'favicon.ico', mimetype='image/vnd.microsoft.icon')
 
 # Create admin
 admin = flask_admin.Admin(
