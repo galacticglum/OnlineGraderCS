@@ -16,6 +16,11 @@
 {% block head %}
 {{super()}}
 <link rel="stylesheet" href="/static/css/contest.css">
+<link rel="stylesheet" href="/static/vendor/highlightjs/default.css">
+<script src="/static/vendor/highlightjs/highlight.pack.js"></script>
+<script>
+    hljs.initHighlightingOnLoad();
+</script>
 
 <style>
 tr.spaceUnder>td {
@@ -87,6 +92,10 @@ Submission
                 </tbody>
             </table>
         </div>
+
+        <hr>
+        <h3>Submitted Source Code</h3>
+        <pre style="background-color: #f0f0f0"><code>{{submission.code.strip()}}</code></pre>
     </div>
 </div>
 {% endblock %}
@@ -94,7 +103,6 @@ Submission
 {% block tail %}
 {{ super() }}
 <script>
-
 var tries = 0;
 function update_results(timer_interval)
 {    
