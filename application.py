@@ -252,7 +252,7 @@ class ProblemView(MyModelView):
     }
 
 class SubmissionView(MyModelView):
-    column_list = ('user_id', 'problem_id', 'time', 'language', 'score')
+    column_list = ('id', 'user_id', 'problem_id', 'time', 'language', 'score')
     form_widget_args = {
         'code' : {
             'readonly': True,
