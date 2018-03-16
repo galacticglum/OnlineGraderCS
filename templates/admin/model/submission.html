@@ -1,0 +1,8 @@
+{% extends 'admin/model/list.html' %} 
+{% block list_row_actions %} 
+    {{ super() }} 
+    <span style="border: 1px solid #dddddd; margin-left: 10px"></span>
+    <a class="icon" href="{{ url_for('submission', submission_id=get_pk_value(row))}}">
+        <span class="fa fa-eye-open glyphicon glyphicon-eye-open" style="margin-left: 10px"></span>
+    </a>
+{% endblock %}

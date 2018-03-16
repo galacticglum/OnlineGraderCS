@@ -276,6 +276,7 @@ class SubmissionView(MyModelView):
         problem_id=lambda v, c, m, p: get_problem_name(m.problem_id))
 
     can_create = False
+    list_template = 'admin/model/submission.html'
 
 class ContestParticipationView(MyModelView):
     column_list = ('user_id', 'contest_id')
@@ -586,7 +587,7 @@ def submission(submission_id):
         abort(404)
         return
 
-    if submission.user_id != current_user.id:
+    if submission.user_id != current_user.id and not current_user.has_role('superuser'):
         abort(403)
         return
  
@@ -608,7 +609,7 @@ def submission_results(submission_id):
         abort(404)
         return
 
-    if submission.user_id != current_user.id:
+    if submission.user_id != current_user.id and not current_user.has_role('superuser'):
         abort(403)
         return
  
