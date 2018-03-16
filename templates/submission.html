@@ -147,11 +147,15 @@ function update_results(timer_interval)
     $.getJSON("{{ url_for('submission_results', submission_id=submission.id) }}",
     function(data)
     {
-        var stop = true;
+        var done_count = 0;
+
         $.each(data,
         function(i, item)
         {
-            stop = item.status != 0;
+            if(item.status != 0)
+            {
+                done_count += 1;
+            }
 
             $('#testrun_' + item.id).text(item.status_name);
             var outer_testrun_element = $('#outer_testrun_' + item.id);
@@ -176,12 +180,12 @@ function update_results(timer_interval)
                 }
             }
         });
+ 
+        if(++tries >= 30 || done_count == data.length)
+        {
+            clearInterval(timer_interval);
+        }
     });
-
-    if(++tries >= 30 || stop)
-    {
-        clearInterval(timer_interval);
-    }
 }
 
 interval = setInterval(function()
