@@ -319,9 +319,9 @@ class SubmissionForm(FlaskForm):
     submit = SubmitField('Submit')
 
 
-def run_subprocess_safe(args, input_data):
+def run_subprocess_safe(args, input_data=None, timeout=None):
     try:
-        output = subprocess.check_output(args, input=input_data, timeout=application.config['SCRIPT_RUN_TIMEOUT'], stderr=subprocess.STDOUT).decode('utf-8')
+        output = subprocess.check_output(args, input=input_data, timeout=timeout, stderr=subprocess.STDOUT).decode('utf-8')
         return output, 0
     except subprocess.TimeoutExpired as _:
         return None, -2
@@ -329,7 +329,7 @@ def run_subprocess_safe(args, input_data):
         return e.output.decode('utf-8'), -3
         
 
-def run_testcase_compiled(input_data, expected_output, testcase_id, submission_id, language_mode, exec_filepath, do_delete=False):
+def run_testcase_compiled(input_data, expected_output, testcase_id, submission_id, language_mode, exec_filepath, exec_errlog, do_delete=False):
     if language_mode == 0: return
 
     command = str()
@@ -338,7 +338,10 @@ def run_testcase_compiled(input_data, expected_output, testcase_id, submission_i
     elif language_mode == 2:
         command = ["java", "-classpath", "{0}".format(exec_filepath), "Main"]
 
-    output, comp_status = run_subprocess_safe(command, input_data)
+    output, comp_status = run_subprocess_safe(command, input_data, application.config['SCRIPT_RUN_TIMEOUT'])
+    if comp_status == -3:
+        output = exec_errlog
+
     write_test_run(expected_output, output, testcase_id, submission_id, comp_status)
 
     if do_delete:
@@ -351,7 +354,7 @@ def run_testcase_compiled(input_data, expected_output, testcase_id, submission_i
 def run_testcase_python(source_code, input_data, expected_output, testcase_id, submission_id, language_mode):
     if language_mode != 0: return
 
-    output, comp_status = run_subprocess_safe(["python", "-c", source_code], input_data)
+    output, comp_status = run_subprocess_safe(["python", "-c", source_code], input_data, application.config['SCRIPT_RUN_TIMEOUT'])
     write_test_run(expected_output, output, testcase_id, submission_id, comp_status)
 
 def write_test_run(expected_output, output, testcase_id, submission_id, comp_status):
@@ -450,10 +453,15 @@ def contest(contest_id):
             temp_source_file.write(source_code)
             temp_source_file.close()
 
+            command = []
             if language_mode == 1:
-                subprocess.call(["csc", "-out:{0}".format(temp_exec_file.name), temp_source_file.name])
+                command = ["csc", "-out:{0}".format(temp_exec_file.name), temp_source_file.name]
             elif language_mode == 2:
-                subprocess.call(["javac", temp_source_file.name])
+                command = ["javac", temp_source_file.name]
+
+            exec_output, status = run_subprocess_safe(command)
+            if status != -3:
+                exec_output = None
 
             os.remove(temp_source_file.name)
 
@@ -472,7 +480,7 @@ def contest(contest_id):
                 do_delete = i == len(testcases) - 1
 
                 compile_thread = threading.Thread(target=run_testcase_compiled, args=(binary_input, expected_output, testcase.id, submission.id, \
-                    language_mode, (temp_exec_file.name if language_mode == 1 else temp_dir), do_delete))
+                    language_mode, (temp_exec_file.name if language_mode == 1 else temp_dir), exec_output, do_delete))
             
             compile_thread.start()
 
