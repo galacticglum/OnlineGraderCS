@@ -26,7 +26,7 @@ Contest
 <div class="row-fluid">
     <div class="col-sm-8 col-sm-offset-2">
         <h1>{{contest.name}}</h1>
-        <p id="clock"></p>
+        <p id="clock">{% if current_user.has_role('superuser') %}No time limit{% endif %}</p>
         {% if current_user.is_authenticated and current_user.has_role('superuser') %}
         <a class="btn btn-primary btn-sm" href="{{ url_for('scoreboard', contest_id=contest.id) }}">View Scoreboard</a>
         <hr>
@@ -114,6 +114,7 @@ Contest
 {% block tail %}
 {{ super() }}
 <script>
+{% if not current_user.has_role('superuser') %}
 // Set the date we're counting down to
 var current_date = new Date();
 current_date.setSeconds(current_date.getSeconds() + {{time_left}});
@@ -144,6 +145,7 @@ function count_down(timer_interval) {
         document.getElementById("clock").innerHTML = "Time's up!";
     }
 }
+{% endif %}
 
 count_down();
 interval = setInterval(function() {

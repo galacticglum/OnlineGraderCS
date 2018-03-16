@@ -416,7 +416,7 @@ def contest(contest_id):
         .filter(ContestParticipation.contest_id == contest_id)
 
     if form.validate_on_submit():
-        if contest.has_duration_expired(participation_query.first()):
+        if contest.has_duration_expired(participation_query.first()) and current_user.has_role('superuser'):
             flash('Sorry, unable to submit.', 'error')
             return redirect(url_for('contest', contest_id=contest_id))
 
@@ -488,7 +488,7 @@ def contest(contest_id):
         return redirect(url_for('submission', submission_id=submission.id))
     else:
         # Check if the contest has expired or if it hasn't started yet
-        if not contest.is_running():
+        if not contest.is_running() and not current_user.has_role('superuser'):
             flash('Sorry, the contest you are trying to join is closed.', 'error')
             return redirect(url_for('index'))
 
@@ -522,7 +522,7 @@ def contest(contest_id):
                 .order_by(Submission.time.desc()).all():
                 submissions.append((problem, submission))
 
-        can_submit = not contest.has_duration_expired(participation_query.first())
+        can_submit = not contest.has_duration_expired(participation_query.first()) or current_user.has_role('superuser')
         return render_template('contest.html', contest=contest, submissions=submissions, time_left=time_left.total_seconds(), 
             submission_form=form, can_submit=can_submit, most_recent_submissions=most_recent_submissions, 
             highest_scoring_submissions=highest_scoring_submissions)
@@ -533,6 +533,8 @@ def get_scoreboard_results(contest_id):
 
     scores = []
     for participation in participations:
+        if (participation[0].has_role('superuser')): continue
+
         total_score = get_total_score(contest_id, participation[0].id)
         result_object = {}
         result_object['user'] = get_user_full_name(participation[0].id)
