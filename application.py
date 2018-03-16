@@ -416,7 +416,9 @@ def contest(contest_id):
         .filter(ContestParticipation.contest_id == contest_id)
 
     if form.validate_on_submit():
-        if contest.has_duration_expired(participation_query.first()) and current_user.has_role('superuser'):
+        submission_count = db.session.query(Submission).filter(Submission.user_id == current_user.id, Submission.problem_id == form.problem.data).count()
+
+        if (contest.has_duration_expired(participation_query.first()) and not current_user.has_role('superuser')) or submission_count > 50:
             flash('Sorry, unable to submit.', 'error')
             return redirect(url_for('contest', contest_id=contest_id))
 
