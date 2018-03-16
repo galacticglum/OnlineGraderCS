@@ -39,7 +39,7 @@ Home
                     </thead>
                     <tbody>
                     {% for contest in contests %}
-                    {% if contest.is_running() %}
+                    {% if contest.is_running() or current_user.has_role('superuser') %}
                     <tr>
                         <td>{{ contest.name }}</td>
                         <td>{{ formatted_datetime(contest.start_time) }}</td>
