@@ -25,12 +25,14 @@ from werkzeug.datastructures import FileStorage
 from flask_wtf.file import FileRequired, FileField
 from flask_wtf import FlaskForm
 from sqlalchemy.event import listens_for
+from flask_migrate import Migrate, MigrateCommand
 
 # Create Flask application
-application = Flask(__name__, instance_relative_config = True)
-application.config.from_object('config')
+application = Flask(__name__, instance_relative_config=True, instance_path=os.path.join(os.path.dirname(os.path.realpath(__file__)), 'instance'))
+application.config.from_object('default_settings')
 application.config.from_pyfile('config.py')
 db = SQLAlchemy(application)
+migrate = Migrate(application, db)
 
 # Create directory for file fields to use
 upload_file_path = os.path.join(os.path.dirname(__file__), 'files')
@@ -189,6 +191,7 @@ class TestRun(db.Model):
     testcase_id = db.Column(db.Integer, primary_key=True)
     submission_id = db.Column(db.Integer, primary_key=True)
     status = db.Column(db.Integer)
+    output = db.Column(db.Text)
 
     def get_status_name(self):
         if self.status == 1:
@@ -197,7 +200,7 @@ class TestRun(db.Model):
         if self.status == 0:
             return "Pending"
 
-        if self.status == -1:
+        if self.status == -1 or self.status == -3:
             return "Failed"
 
         if self.status == -2:
@@ -318,12 +321,12 @@ class SubmissionForm(FlaskForm):
 
 def run_subprocess_safe(args, input_data):
     try:
-        output = subprocess.check_output(args, input=input_data, timeout=application.config['SCRIPT_RUN_TIMEOUT']).decode('utf-8')
+        output = subprocess.check_output(args, input=input_data, timeout=application.config['SCRIPT_RUN_TIMEOUT'], stderr=subprocess.STDOUT).decode('utf-8')
         return output, 0
     except subprocess.TimeoutExpired as _:
         return None, -2
-    except:
-        return None, -1
+    except subprocess.CalledProcessError as e:
+        return e.output.decode('utf-8'), -3
         
 
 def run_testcase_compiled(input_data, expected_output, testcase_id, submission_id, language_mode, exec_filepath, do_delete=False):
@@ -354,11 +357,11 @@ def run_testcase_python(source_code, input_data, expected_output, testcase_id, s
 def write_test_run(expected_output, output, testcase_id, submission_id, comp_status):
     with application.app_context():
         correct = False
-        if output != None:
+        if output != None and comp_status != -3:
             correct = Testcase.matches(expected_output, output.splitlines())
 
         status = comp_status if comp_status != 0 else (1 if correct else -1)
-        test_run = TestRun(testcase_id=testcase_id, submission_id=submission_id, status=status)
+        test_run = TestRun(testcase_id=testcase_id, submission_id=submission_id, status=status, output=output if output else '')
         db.session.add(test_run)
 
         submission = db.session.query(Submission).with_lockmode('update').filter(Submission.id == submission_id).first()
@@ -416,7 +419,12 @@ def contest(contest_id):
             flash('Sorry, unable to submit.', 'error')
             return redirect(url_for('contest', contest_id=contest_id))
 
-        source_code = request.files['file'].read().decode('utf-8-sig')
+        try:       
+            source_code = request.files['file'].read().decode('utf-8-sig')
+        except:
+            flash('Unable to submit, could not read file. Make sure that you are uploading the text file containing your source code. Valid file endings include: ".cs", ".py", and ".java".', 'error')
+            return redirect(url_for('contest', contest_id=contest_id))
+
         language_mode = int(form.language.data)
         submission = Submission(user_id=current_user.id, problem_id=form.problem.data, time=datetime.datetime.now(), code=source_code, score=0, language=language_mode)
         db.session.add(submission)
@@ -601,6 +609,7 @@ def submission_results(submission_id):
         result_object['id'] = testcase.id
         result_object['status'] = test_run.status if test_run != None else 0
         result_object['status_name'] = 'None' if test_run == None else test_run.get_status_name()
+        result_object['output'] = '' if test_run == None or test_run.output == None else test_run.output
         tests.append(result_object)
 
     return jsonify(tests)
@@ -626,6 +635,7 @@ admin.add_view(MyModelView(Testcase, db.session))
 admin.add_view(SubmissionView(Submission, db.session))
 admin.add_view(ContestParticipationView(ContestParticipation, db.session))
 
+
 # define a context processor for merging flask-admin's template context into the
 # flask-security and app views.
 @security.context_processor
@@ -642,5 +652,4 @@ def context_processor():
     )
 
 if __name__ == '__main__':
-    # Start app
     application.run(debug=True)

@@ -6,7 +6,7 @@
         active
     {% elif test_run.status == 1%}
         success
-    {% elif test_run.status == -1%}
+    {% elif test_run.status == -1 or test_run.status == -3 %}
         danger
     {% elif test_run.status == -2%}
         warning
@@ -88,6 +88,12 @@ Submission
                                 {% endif %}
                             </td>
                         </tr>  
+
+                        <tr {% if test[1].status != -3 %}hidden{% endif %} class="active">
+                            <td colspan="2">
+                                <pre id="error_output_testrun_{{test[0].id}}">{{test[1].output}}</pre>                    
+                            </td>
+                        </tr>
                     {% endfor %}
                 </tbody>
             </table>
@@ -104,6 +110,11 @@ Submission
 {{ super() }}
 <script>
 var tries = 0;
+
+$.fn.hasAttr = function(name) {  
+   return this.attr(name) !== undefined;
+};
+
 function update_results(timer_interval)
 {    
     function get_test_run_status_html(status)
@@ -118,6 +129,8 @@ function update_results(timer_interval)
                 return "danger";
             case -2:
                 return "warning";
+            case -3:
+                return "danger";
         }
     }
 
@@ -135,6 +148,23 @@ function update_results(timer_interval)
 
             outer_testrun_element.removeClass();
             outer_testrun_element.addClass(get_test_run_status_html(item.status));
+
+            var error_output_element = $('#error_output_testrun_' + item.id);
+            if(item.status == -3)
+            {
+                error_output_element.text(item.output);
+                if(error_output_element.parent().parent().hasAttr('hidden'))
+                {
+                    error_output_element.parent().parent().removeAttr('hidden')
+                }
+            }
+            else
+            {
+                if(!error_output_element.parent().parent().hasAttr('hidden'))
+                {
+                    error_output_element.parent().parent().attr('hidden', 'hidden');
+                }
+            }
         });
     });
 

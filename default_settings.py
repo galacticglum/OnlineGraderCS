@@ -1,5 +1,3 @@
-# SQLALCHEMY_ECHO = True
-
 # Flask-Security URLs, overridden because they don't put a / at the end
 SECURITY_LOGIN_URL = "/login/"
 SECURITY_LOGOUT_URL = "/logout/"
