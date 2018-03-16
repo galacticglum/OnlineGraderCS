@@ -74,6 +74,12 @@ def get_problem_name(problem_id):
 
     return problem.name
 
+def get_contest_name(contest_id):
+    contest = db.session.query(Contest).filter(Contest.id == contest_id).first()
+    if contest == None: return 'None: id={0}'.format(contest_id)
+
+    return contest.name
+
 class Role(db.Model, RoleMixin):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(80), unique=True)
@@ -264,6 +270,14 @@ class SubmissionView(MyModelView):
     column_formatters = dict(language=lambda v, c, m, p: m.get_language_name(), 
         user_id=lambda v, c, m, p: get_user_full_name(m.user_id),
         problem_id=lambda v, c, m, p: get_problem_name(m.problem_id))
+
+    can_create = False
+
+class ContestParticipationView(MyModelView):
+    column_list = ('user_id', 'contest_id')
+    column_labels = dict(user_id='User', contest_id='Contest')
+    column_formatters = dict(user_id=lambda v, c, m, p: get_user_full_name(m.user_id),
+                            contest_id=lambda v, c, m, p: get_contest_name(m.contest_id))
 
     can_create = False
 
@@ -610,6 +624,7 @@ admin.add_view(MyModelView(Contest, db.session))
 admin.add_view(ProblemView(Problem, db.session))
 admin.add_view(MyModelView(Testcase, db.session))
 admin.add_view(SubmissionView(Submission, db.session))
+admin.add_view(ContestParticipationView(ContestParticipation, db.session))
 
 # define a context processor for merging flask-admin's template context into the
 # flask-security and app views.
