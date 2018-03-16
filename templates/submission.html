@@ -92,7 +92,13 @@ Submission
                                 {% endif %}
                             </td>
                         </tr>  
-
+                        {% if submission.compiler_output %}
+                        <tr class="active">
+                            <td colspan="2">
+                                <pre>{{submission.compiler_output}}</pre>                    
+                            </td>
+                        </tr>
+                        {% endif %}
                         <tr {% if test[1].status != -3 %}hidden{% endif %} class="active">
                             <td colspan="2">
                                 <pre id="error_output_testrun_{{test[0].id}}">{{test[1].output}}</pre>                    

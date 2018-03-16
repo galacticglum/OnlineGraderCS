@@ -173,6 +173,7 @@ class Submission(db.Model):
     code = db.Column(db.Text)
     language = db.Column(db.Integer)
     score = db.Column(db.Integer)
+    compiler_output = db.Column(db.Text)
 
     def get_language_name(self):
         if self.language == 0:
@@ -329,7 +330,7 @@ def run_subprocess_safe(args, input_data=None, timeout=None):
         return e.output.decode('utf-8'), -3
         
 
-def run_testcase_compiled(input_data, expected_output, testcase_id, submission_id, language_mode, exec_filepath, exec_errlog, do_delete=False):
+def run_testcase_compiled(input_data, expected_output, testcase_id, submission_id, language_mode, exec_filepath, do_delete=False):
     if language_mode == 0: return
 
     command = str()
@@ -339,9 +340,6 @@ def run_testcase_compiled(input_data, expected_output, testcase_id, submission_i
         command = ["java", "-classpath", "{0}".format(exec_filepath), "Main"]
 
     output, comp_status = run_subprocess_safe(command, input_data, application.config['SCRIPT_RUN_TIMEOUT'])
-    if comp_status == -3:
-        output = exec_errlog
-
     write_test_run(expected_output, output, testcase_id, submission_id, comp_status)
 
     if do_delete:
@@ -429,15 +427,12 @@ def contest(contest_id):
             return redirect(url_for('contest', contest_id=contest_id))
 
         language_mode = int(form.language.data)
-        submission = Submission(user_id=current_user.id, problem_id=form.problem.data, time=datetime.datetime.now(), code=source_code, score=0, language=language_mode)
-        db.session.add(submission)
-        db.session.commit()
-
         problem = db.session.query(Problem).filter(Problem.id == form.problem.data).first()
 
         temp_dir = tempfile.mkdtemp()
         temp_exec_file = None
 
+        exec_output = None
         if language_mode != 0:
             temp_source_file = None
             temp_exec_file = None
@@ -465,6 +460,12 @@ def contest(contest_id):
 
             os.remove(temp_source_file.name)
 
+        submission = Submission(user_id=current_user.id, problem_id=form.problem.data, time=datetime.datetime.now(), \
+            code=source_code, score=0, language=language_mode, compiler_output=exec_output)
+
+        db.session.add(submission)
+        db.session.commit()
+
         testcases = problem.testcases.all()
         for i in range(len(testcases)):
             testcase = testcases[i]
@@ -480,7 +481,7 @@ def contest(contest_id):
                 do_delete = i == len(testcases) - 1
 
                 compile_thread = threading.Thread(target=run_testcase_compiled, args=(binary_input, expected_output, testcase.id, submission.id, \
-                    language_mode, (temp_exec_file.name if language_mode == 1 else temp_dir), exec_output, do_delete))
+                    language_mode, (temp_exec_file.name if language_mode == 1 else temp_dir), do_delete))
             
             compile_thread.start()
 
