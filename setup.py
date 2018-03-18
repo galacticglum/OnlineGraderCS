@@ -6,7 +6,7 @@ import string
 import random
 
 from application import application, db, user_datastore, encrypt_password, User, Role, \
-    Contest, Problem, Testcase, ContestParticipation, Submission, TestRun
+    Contest, Problem, Testcase, ContestParticipation, Submission, TestRun, GoogleCredentials
 
 db.drop_all()
 db.create_all()

@@ -10,7 +10,7 @@ import uuid
 import flask_admin
 import wtforms
 
-from flask import Flask, url_for, redirect, render_template, request, abort, flash, send_file, send_from_directory, jsonify
+from flask import Flask, url_for, redirect, render_template, request, abort, flash, send_file, send_from_directory, jsonify, session
 from flask_sqlalchemy import SQLAlchemy
 from flask_security import Security, SQLAlchemyUserDatastore, UserMixin, RoleMixin, login_required, current_user
 from flask_security.forms import RegisterForm, LoginForm
@@ -28,11 +28,18 @@ from sqlalchemy.event import listens_for
 from flask_migrate import Migrate, MigrateCommand
 from instance.instance_config_setup import create_config
 
+import google.oauth2.credentials
+import google_auth_oauthlib.flow
+
 # Create Flask application
 application = Flask(__name__, instance_relative_config=True, instance_path=os.path.join(os.path.dirname(os.path.realpath(__file__)), 'instance'))
 application.config.from_object('default_settings')
 application.config.from_pyfile('instance_base_config.py')
 create_config(application)
+
+# Get google credentials info
+client_secret_path = os.path.join(application.instance_path, 'client_secret.json')
+google_scopes = ['https://www.googleapis.com/auth/drive.metadata.readonly']
 
 db = SQLAlchemy(application)
 migrate = Migrate(application, db)
@@ -209,6 +216,10 @@ class TestRun(db.Model):
 
         if self.status == -2:
             return "Timeout"
+
+class GoogleCredentials(db.Model):
+    user_id = db.Column(db.Integer, primary_key=True)
+    credentials_json = db.Column(db.Text)
 
 class ExtendedRegisterForm(RegisterForm):
     first_name = TextField('First Name', [wtforms.validators.Required()])
@@ -631,6 +642,57 @@ def submission_results(submission_id):
 
     return jsonify(tests)
 
+def credentials_to_dict(credentials):
+  return {'token': credentials.token,
+          'refresh_token': credentials.refresh_token,
+          'token_uri': credentials.token_uri,
+          'client_id': credentials.client_id,
+          'client_secret': credentials.client_secret,
+          'scopes': credentials.scopes}
+
+@application.route('/settings')
+def settings():
+    return render_template('settings.html')
+
+def get_google_credentials():
+    credentials = db.session.query(GoogleCredentials).filter(GoogleCredentials.user_id == current_user.id)
+    return credentials
+
+def has_authenticated_with_google():
+    return get_google_credentials() != None
+
+@application.route('/authenticate/drive')
+def authenticate_drive():
+    # Create flow instance to manage the OAuth 2.0 Authorization Grant Flow steps.
+    flow = google_auth_oauthlib.flow.Flow.from_client_secrets_file(client_secret_path, scopes=google_scopes)
+    flow.redirect_uri = url_for('authenticate_drive_callback', _external=True)
+
+    authorization_url, state = flow.authorization_url(access_type='offline', include_granted_scopes='true')
+    session['state'] = state
+
+    return redirect(authorization_url)
+
+@application.route('/authenticate/drive/oauth2callback')
+def authenticate_drive_callback():
+    # Specify the state when creating the flow in the callback so that it can
+    # verified in the authorization server response.
+    state = session['state']
+
+    flow = google_auth_oauthlib.flow.Flow.from_client_secrets_file(client_secret_path, scopes=google_scopes, state=state)
+    flow.redirect_uri = url_for('authenticate_drive_callback', _external=True)
+
+    # Use the authorization server's response to fetch the OAuth 2.0 tokens.
+    authorization_response = request.url
+    flow.fetch_token(authorization_response=authorization_response)
+
+    # Store credentials
+    print(type(flow.credentials))
+    credentials = GoogleCredentials(user_id=current_user.id, credentials_json=flow.credentials)
+    db.session.merge(credentials)
+    db.session.commit()
+
+    return redirect(url_for('settings'))
+
 @application.route('/favicon.ico')
 def favicon():
     return send_from_directory(os.path.join(application.root_path, 'static'), 'favicon.ico', mimetype='image/vnd.microsoft.icon')
@@ -665,7 +727,8 @@ def context_processor():
         get_url=url_for,
         formatted_datetime=get_formatted_datetime,
         get_total_score=get_total_score,
-        get_user_full_name=get_user_full_name
+        get_user_full_name=get_user_full_name,
+        has_authenticated_with_google=has_authenticated_with_google
     )
 
 if __name__ == '__main__':
