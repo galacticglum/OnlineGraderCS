@@ -33,11 +33,23 @@ from instance.instance_config_setup import create_config
 import google.oauth2.credentials
 import google_auth_oauthlib.flow
 
+class ReverseProxied(object):
+    def __init__(self, app):
+        self.app = app
+
+    def __call__(self, environ, start_response):
+        scheme = environ.get('HTTP_X_FORWARDED_PROTO')
+        if scheme:
+            environ['wsgi.url_scheme'] = scheme
+        return self.app(environ, start_response)
+
 # Create Flask application
 application = Flask(__name__, instance_relative_config=True, instance_path=os.path.join(os.path.dirname(os.path.realpath(__file__)), 'instance'))
 application.config.from_object('default_settings')
 application.config.from_pyfile('instance_base_config.py')
 create_config(application)
+
+application.wsgi_app = ReverseProxied(app.wsgi_app)
 
 # Get google credentials info
 client_secret_path = os.path.join(application.instance_path, 'client_secret.json')
