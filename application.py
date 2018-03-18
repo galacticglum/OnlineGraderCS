@@ -6,6 +6,8 @@ import threading
 import tempfile
 import shutil
 import uuid
+import json
+import requests
 
 import flask_admin
 import wtforms
@@ -650,13 +652,19 @@ def credentials_to_dict(credentials):
           'client_secret': credentials.client_secret,
           'scopes': credentials.scopes}
 
+def credentials_to_json(credentials):
+    credentials_as_dict = credentials_to_dict(credentials)
+    credentials_json = json.dumps(credentials_as_dict)
+
+    return credentials_json
+
+def json_credentials_to_dict(credentials_json): return json.loads(credentials_json)
+
 @application.route('/settings')
 def settings():
     return render_template('settings.html')
 
-def get_google_credentials():
-    credentials = db.session.query(GoogleCredentials).filter(GoogleCredentials.user_id == current_user.id)
-    return credentials
+def get_google_credentials(): return db.session.query(GoogleCredentials).filter(GoogleCredentials.user_id == current_user.id).first()
 
 def has_authenticated_with_google():
     return get_google_credentials() != None
@@ -685,10 +693,38 @@ def authenticate_drive_callback():
     authorization_response = request.url
     flow.fetch_token(authorization_response=authorization_response)
 
-    # Store credentials
-    print(type(flow.credentials))
-    credentials = GoogleCredentials(user_id=current_user.id, credentials_json=flow.credentials)
-    db.session.merge(credentials)
+    credentials_query = get_google_credentials()
+    if credentials_query == None:
+        # Store credentials
+        credentials = GoogleCredentials(user_id=current_user.id, credentials_json=credentials_to_json(flow.credentials))
+        db.session.add(credentials)
+    else:
+        credentials_query.credentials_json = credentials_to_json(flow.credentials)
+
+    db.session.commit()
+
+    return redirect(url_for('settings'))
+
+@application.route('/authenticate/drive/revoke')
+def revoke_drive_authentication():
+    user_google_credentials = get_google_credentials()
+    if user_google_credentials == None:
+        abort(403)
+        return
+
+    credentials = google.oauth2.credentials.Credentials(**json_credentials_to_dict(user_google_credentials.credentials_json))
+
+    revoke = requests.post('https://accounts.google.com/o/oauth2/revoke',
+        params={'token': credentials.token},
+        headers = {'content-type': 'application/x-www-form-urlencoded'})
+
+    status_code = getattr(revoke, 'status_code')
+    if status_code == 200:
+        flash('Google credentials successfully revoked.', 'success')
+    else:
+        flash('An error occurred revoking Google credentials.', 'error')
+
+    GoogleCredentials.query.filter(GoogleCredentials.user_id == current_user.id).delete()
     db.session.commit()
 
     return redirect(url_for('settings'))
@@ -732,4 +768,7 @@ def context_processor():
     )
 
 if __name__ == '__main__':
-    application.run(debug=True)
+    context = (os.path.join(application.instance_path, 'dev.cert'), 
+        os.path.join(application.instance_path, 'dev_cert.key'))
+
+    application.run(debug=True, ssl_context=context)

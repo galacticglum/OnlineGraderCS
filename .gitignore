@@ -125,3 +125,4 @@ files/
 !.vscode/extensions.json
 
 .vs/
+migrations/
