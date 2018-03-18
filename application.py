@@ -26,12 +26,13 @@ from flask_wtf.file import FileRequired, FileField
 from flask_wtf import FlaskForm
 from sqlalchemy.event import listens_for
 from flask_migrate import Migrate, MigrateCommand
+from instance.instance_config_setup import create_config
 
 # Create Flask application
 application = Flask(__name__, instance_relative_config=True, instance_path=os.path.join(os.path.dirname(os.path.realpath(__file__)), 'instance'))
 application.config.from_object('default_settings')
-application.config.from_pyfile('base_config.py')
-application.config.from_pyfile('config_local.py')
+application.config.from_pyfile('instance_base_config.py')
+create_config(application)
 
 db = SQLAlchemy(application)
 migrate = Migrate(application, db)
