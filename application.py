@@ -30,7 +30,9 @@ from flask_migrate import Migrate, MigrateCommand
 # Create Flask application
 application = Flask(__name__, instance_relative_config=True, instance_path=os.path.join(os.path.dirname(os.path.realpath(__file__)), 'instance'))
 application.config.from_object('default_settings')
-application.config.from_pyfile('config.py')
+application.config.from_pyfile('base_config.py')
+application.config.from_pyfile('config_local.py')
+
 db = SQLAlchemy(application)
 migrate = Migrate(application, db)
 
