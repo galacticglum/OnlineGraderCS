@@ -49,7 +49,7 @@ application.config.from_object('default_settings')
 application.config.from_pyfile('instance_base_config.py')
 create_config(application)
 
-application.wsgi_app = ReverseProxied(app.wsgi_app)
+application.wsgi_app = ReverseProxied(application.wsgi_app)
 
 # Get google credentials info
 client_secret_path = os.path.join(application.instance_path, 'client_secret.json')
