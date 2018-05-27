@@ -32,8 +32,8 @@
             <div class="row">
                 <label for="sel1">Method</label>
                 <select class="form-control" id="export-format">
-                    <option>CSV Download</option>
-                    <option>Save to Google Drive</option>
+                    <option value="0">CSV Download</option>
+                    <option value="1">Save to Google Drive</option>
                 </select>
             </div>
             <div class="row" style="margin-top: 5px">
@@ -51,24 +51,31 @@
 {% endblock %} {% block tail %} {{ super() }}
 <script>
     $('#export-btn').click(function () {
-
-        $.getJSON("{{ url_for('scoreboard_results', contest_id=contest.id) }}",
-            function (data) {
-                var csv_data = "Rank,Name,Score\r\n";
-                for (var i = 0; i < data.scores.length; i++) 
-                {
-                    csv_data += i + 1 + ",";
-                    if(document.getElementById('include-usernames').checked)
+        selected_format = $('#export-format').val();
+        if(selected_format == "0")
+        {
+            $.getJSON("{{ url_for('scoreboard_results', contest_id=contest.id) }}",
+                function (data) {
+                    var csv_data = "Rank,Name,Score\r\n";
+                    for (var i = 0; i < data.scores.length; i++) 
                     {
-                        csv_data += data.scores[i].user + ",";
+                        csv_data += i + 1 + ",";
+                        if(document.getElementById('include-usernames').checked)
+                        {
+                            csv_data += data.scores[i].user + ",";
+                        }
+
+                        csv_data += data.scores[i].total_score + '\r\n';
                     }
 
-                    csv_data += data.scores[i].total_score + '\r\n';
-                }
-
-                var blob = new Blob([csv_data], { type: "text/csv;charset=utf-8" });
-                saveAs(blob, 'contest_{{contest.id}}_results.csv');
-            });
+                    var blob = new Blob([csv_data], { type: "text/csv;charset=utf-8" });
+                    saveAs(blob, 'contest_{{contest.id}}_results.csv');
+                });
+        }
+        else if(selected_format == "1")
+        {
+            console.log('export to drive');
+        }
     });
 
     function update_results(timer_interval) {
@@ -77,7 +84,8 @@
                 $("#scores").empty()
 
                 for (var i = 0; i < data.scores.length; i++) {
-                    $("#scores").append("<tr><td>" + (i + 1) + "</td><td>" + data.scores[i].user + "</td><td>" + data.scores[i].total_score + "</td></tr>")
+                    $("#scores").append("<tr><td>" + (i + 1) + "</td><td>" + data.scores[i].user + 
+                        "</td><td>" + data.scores[i].total_score + "</td></tr>")
                 }
 
                 if (data.closed) {
