@@ -2,11 +2,9 @@
 Populate a small db with some example entries.
 """
 
-import string
-import random
-
-from application import application, db, user_datastore, encrypt_password, User, Role, \
-    Contest, Problem, Testcase, ContestParticipation, Submission, TestRun, GoogleCredentials
+from grader import application, db, user_datastore
+from grader.models import Role
+from flask_security.utils import encrypt_password
 
 db.drop_all()
 db.create_all()
