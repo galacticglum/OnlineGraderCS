@@ -2,11 +2,11 @@
 {% set active_page = "rules" %} 
 {% block head %} 
 {{ super() }}
-<link rel="stylesheet" href="/static/css/rules.css">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/rules.css') }}">
 {% endblock %} 
 
 {% block tail %}
-<script src="/static/js/rules.js"></script> 
+<script src="{{ url_for('static', filename='js/rules.js') }}"></script> 
 {% endblock %}
 
 {% block page_name %} 

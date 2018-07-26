@@ -15,9 +15,9 @@
 
 {% block head %}
 {{super()}}
-<link rel="stylesheet" href="/static/css/contest.css">
-<link rel="stylesheet" href="/static/vendor/highlightjs/default.css">
-<script src="/static/vendor/highlightjs/highlight.pack.js"></script>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/contest.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='vendor/highlightjs/default.css') }}">
+<script src="{{ url_for('static', filename='vendor/highlightjs/highlight.pack.js') }}"></script>
 <script>
     hljs.initHighlightingOnLoad();
 </script>

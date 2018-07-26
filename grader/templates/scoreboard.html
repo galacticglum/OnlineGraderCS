@@ -1,6 +1,10 @@
-{% extends '_layout.html' %} {% set active_page = "" %} {% block page_name %} Scoreboard {% endblock %} {% block head %}
+{% extends '_layout.html' %} 
+{% set active_page = "" %} 
+{% block page_name %} Scoreboard {% endblock %} 
+
+{% block head %}
 {{ super() }}
-<script src="/static/vendor/FileSaver.js"></script> {% endblock %} {% block body %} {{ super() }}
+<script src="{{ url_for('static', filename='vendor/FileSaver.js') }}"></script> {% endblock %} {% block body %} {{ super() }}
 <div class="row-fluid">
     <div class="col-sm-8 col-sm-offset-2">
         <h3>Scoreboard: {{contest.name}}</h3>
@@ -48,7 +52,10 @@
         </div>
     </div>
 </div>
-{% endblock %} {% block tail %} {{ super() }}
+{% endblock %} 
+
+{% block tail %} 
+{{ super() }}
 <script>
     $('#export-btn').click(function () {
         selected_format = $('#export-format').val();
@@ -98,4 +105,5 @@
         update_results(interval);
     }, 5000);
 
-</script> {% endblock %}
+</script> 
+{% endblock %}

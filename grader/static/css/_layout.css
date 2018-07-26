@@ -1,0 +1,19 @@
+html body{
+    background-color: #fafafa;
+}
+
+.sharp-corner {
+    border-radius: 0 !important;
+}
+
+nav {
+    border-width: 0px 1px 0px 1px;
+    border-color: #e2e5e7;
+    border-style: solid;
+}
+
+.navbar-custom {
+    background-color: white;
+}
+
+.box-shadow { box-shadow: 0 .25rem .75rem rgba(0, 0, 0, .05); }

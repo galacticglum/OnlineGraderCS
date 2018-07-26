@@ -2,7 +2,7 @@
 
 {% block head %}
 {{ super() }}
-<link rel="stylesheet" href="/static/css/master.css">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/master.css') }}">
 {% endblock %}
  
 {% block menu_links %}
