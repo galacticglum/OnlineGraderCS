@@ -1,4 +1,3 @@
-{% extends 'admin/master.html' %}
 {% from "security/_macros.html" import render_field, render_field_with_errors, render_checkbox_field, render_field_with_label %}
 
 {% set navigation_bar = [
@@ -8,27 +7,176 @@
 
 {% set active_page = active_page|default('index') -%}
 
-{% block title %}
-{% if self.page_name() %} {% block page_name %}{% endblock %} -{% endif %} Online Grader 
-{% endblock %}
+<!doctype html>
+<html lang="en">
+<head>
+    <title>
+        {% block title %}
+        {% if self.page_name() %} {% block page_name %}{% endblock %} -{% endif %} Online Grader 
+        {% endblock %}
+    </title>
 
-{% block brand %}
-<a class="navbar-brand" href="{{ url_for('index') }}">Online Grader</a>
-{% endblock %}
-
-{% block main_menu %}
-<ul class="nav navbar-nav">
-    {% block main_menu_items %}
-        {% for href, id, caption in navigation_bar %}
-            <li{% if id == active_page %} class="active"{% endif %}>
-                <a href="{{ url_for(href|e) }}">{{ caption|e }}</a>
-            </li>
-        {% endfor %}
+    {% block head_meta %}
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     {% endblock %}
-    {% if current_user.is_authenticated and current_user.has_role('superuser') %}
-    <li>
-        <a href="/admin">Dashboard</a>
-    </li>  
-    {% endif %}
-</ul>
-{% endblock %}
+
+    {% block head_css %}
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.2/css/bootstrap.min.css" integrity="sha384-Smlep5jCw/wG7hdkwQ/Z5nLIefveQRIY9nfy6xoR1uRYBtpZgI6339F5dgvm/e9B"
+        crossorigin="anonymous">
+    <link rel="stylesheet" href="./main.css">
+    {% endblock %}
+
+    {% block head %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/_layout.css') }}">
+    {% endblock %}
+
+    {% block head_tail %}
+    {% endblock %}
+</head>
+
+<body>
+    {% block page_body %}
+    <main role="main" class="container">
+        <nav class="navbar navbar-expand-lg navbar-light navbar-custom">
+            {% block brand %}
+            <a class="navbar-brand" href="{{ url_for('index') }}">Online Grader</a>
+            {% endblock %}
+
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarsExample09" aria-controls="navbarsExample09"
+                aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="navbarsExample09">
+                {% block main_menu %}
+                <ul class="navbar-nav mr-auto">
+                    {% block main_menu_items %}
+                    {% for href, id, caption in navigation_bar %}
+                        <li{% if id == active_page %} class="nav-item active" {% else %} class="nav-item" {% endif %}>
+                            <a class="nav-link" href="{{ url_for(href|e) }}">{{ caption|e }}</a>
+                        </li>
+                    {% endfor %}
+                    {% endblock %}
+
+                    {% if current_user.is_authenticated and current_user.has_role('superuser') %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="/dashboard">Dashboard</a>
+                    </li>  
+                    {% endif %}
+                </ul>
+                {% endblock %}
+
+                {% block menu_links %}
+                <ul class="navbar-nav ml-auto">
+                    {% if not current_user.is_authenticated %}
+                        <li class="nav-item"><a class="nav-link" href="{{ url_for('security.login') }}">Login</a></li>
+                        <li class="nav-item"><a class="nav-link" href="{{ url_for('security.register') }}">Register</a></li>
+                    {% endif %}
+                </ul>
+                {% endblock %}      
+
+                {% block access_control %}
+                {% if current_user.is_authenticated %}
+                <ul class="navbar-nav ml-auto">
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="user_dropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            <i class="glyphicon glyphicon-user"></i>
+                            {% if current_user.first_name -%}
+                            {{ current_user.first_name }}
+                            {% else -%}
+                            {{ current_user.email }}
+                            {%- endif %}<span class="caret"></span>
+                        </a>
+                        <div class="dropdown-menu" aria-labelledby="user_dropdown">
+                            <a class="dropdown-item" href="{{ url_for('settings') }}">Settings</a>
+                            <a class="dropdown-item" href="{{ url_for('security.logout') }}">Log out</a>
+                        </div>
+                    </li>
+                </ul>
+                {% endif %}
+                {% endblock %}
+            </div>
+        </nav>
+
+        <!-- Display flash messages in modal -->
+        <div id="layoutModal" class="modal fade" role="dialog" tabindex="-1" aria-labelledby="layoutModelLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="layoutModelLabel">Model blah blah</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        {% with messages = get_flashed_messages() %}
+                        {% if messages %}
+                        <ul class=flashes>
+                            {% for message in messages %}
+                            <li>{{ message }}</li>
+                            {% endfor %}
+                        </ul>
+                        {% endif %}
+                        {% endwith %}
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {% block body %}
+        {% endblock %}
+    </main>
+    {% endblock %}
+
+    {% block footer %}
+    <footer class="container">
+        <div class="my-5 pt-5 text-muted text-center text-small">
+            <p class="mb-1">&copy; 2018 Shon Verch and Ole J. Tetlie</p>
+            <ul class="list-inline">
+                <li class="list-inline-item">
+                    <a href="about.html">About</a>
+                </li>
+                <li class="list-inline-item">
+                    <a href="privacy.html">Privacy</a>
+                </li>
+                <li class="list-inline-item">
+                    <a href="terms.html">Terms</a>
+                </li>
+            </ul>
+        </div>
+    </footer>
+    {% endblock %}
+
+    {% block tail_js %}
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
+        crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49"
+        crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.2/js/bootstrap.min.js" integrity="sha384-o+RDsa0aLu++PJvFqy8fFScvbHFLtbvScb8AjopnFD+iEQ7wo/CG0xlczd+2O/em"
+        crossorigin="anonymous"></script>
+
+    <script>
+        $(document).ready(function() 
+        {
+            var messages = "{{ get_flashed_messages() }}";
+            if(typeof messages != 'undefined' && messages != '[]') 
+            {
+                $("#layoutModal").modal();
+            }
+        });
+    </script>
+    {% endblock %}
+
+    {% block tail %}
+    {% endblock %}
+</body>
+
+</html>

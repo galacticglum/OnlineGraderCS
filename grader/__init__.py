@@ -7,8 +7,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_security import Security, SQLAlchemyUserDatastore
 from grader.forms import ExtendedLoginForm, ExtendedRegisterForm
-import flask_admin
-from flask_admin import helpers as admin_helpers
+
 from sqlalchemy.event import listens_for
 
 # Create Flask application
@@ -51,26 +50,6 @@ except OSError:
 # This import will register all the routes, and it MUST be after we create the application
 import grader.routes
 
-# Create admin
-admin = flask_admin.Admin(
-    application,
-    'Dashboard',
-    base_template='my_master.html',
-    template_mode='bootstrap3',
-)
-
-# Add model views
-from grader.models import Role, User, Contest, Problem, Testcase, Submission, ContestParticipation
-from grader.modelviews import MyModelView, ProblemView, SubmissionView, ContestParticipationView
-admin.add_view(MyModelView(Role, db.session))
-admin.add_view(MyModelView(User, db.session))
-admin.add_view(MyModelView(Contest, db.session))
-admin.add_view(ProblemView(Problem, db.session))
-admin.add_view(MyModelView(Testcase, db.session))
-admin.add_view(SubmissionView(Submission, db.session))
-admin.add_view(ContestParticipationView(ContestParticipation, db.session))
-
-
 # define a context processor for merging flask-admin's template context into the
 # flask-security and app views.
 import grader.utilities
@@ -78,23 +57,9 @@ import grader.utilities
 @application.context_processor
 def context_processor():
     return dict(
-        admin_base_template=admin.base_template,
-        admin_view=admin.index_view,
-        h=admin_helpers,
         get_url=url_for,
         formatted_datetime=grader.utilities.get_formatted_datetime,
         get_total_score=grader.utilities.get_total_score,
         get_user_full_name=grader.utilities.get_user_full_name,
         has_authenticated_with_google=grader.utilities.has_authenticated_with_google
     )
-
-# Delete hooks for models, delete files if models are getting deleted
-@listens_for(Problem, 'after_delete')
-def del_file(mapper, connection, target):
-    if target.path:
-        try:
-            os.remove(os.path.join(upload_file_path, target.link))
-        except OSError:
-            # Don't care if was not deleted because it does not exist
-            pass
-
