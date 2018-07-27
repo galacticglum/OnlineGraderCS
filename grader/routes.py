@@ -15,17 +15,19 @@ from grader.forms import SubmissionForm
 import google.oauth2.credentials
 import google_auth_oauthlib.flow
 
+def get_contests():
+    contests = db.session.query(Contest)
+
+    # We need to nullify our contests query if there are no elements.
+    # This is because our template checks whether the contest is null (not the length)
+    if contests.count() == 0:
+        contests = None
+
+    return contests
+
 @application.route('/')
 def index():
-    contests = None
-    if current_user.is_authenticated:
-        contests = db.session.query(Contest)
-
-        # We need to nullify our contests query if there are no elements.
-        # This is because our template checks whether the contest is null (not the length)
-        if contests.count() == 0:
-            contests = None
-        
+    contests = get_contests if current_user.is_authenticated else None
     return render_template('index.html', contests=contests)
 
 @application.route('/rules')
@@ -48,6 +50,13 @@ def problem(problem_id):
         return
 
     return send_file(os.path.join(upload_file_path, problem.pdf_link), attachment_filename="problem{0}.pdf".format(problem.id), mimetype="application/pdf")
+
+@application.route('/contests')
+def contests():
+    contests = get_contests() 
+    display_open_contests = contests != None and any(contest.is_running() for contest in contests.all())
+
+    return render_template('contests.html', contests=contests, display_open_contests=display_open_contests)    
 
 @application.route('/contest/<int:contest_id>', methods=['GET', 'POST'])
 @login_required

@@ -1,0 +1,13 @@
+.table > tbody > tr > td {
+    vertical-align: middle;
+}
+
+.jumbotron {
+  border-width: 0px 1px 1px 1px;
+  border-color: #e2e5e7;
+  border-style: solid;
+}
+
+nav {
+  border-width: 0px 1px 1px 1px !important;
+}

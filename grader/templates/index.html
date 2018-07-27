@@ -1,61 +1,41 @@
 {% extends '_layout.html' %}
 
-{% block head %}
-{{ super() }}
-<link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}">
-{% endblock %}
-
 {% block page_name %}
 Home
 {% endblock %}
 
 {% block body %}
-{{ super() }}
-<div class="row-fluid">
-    <div class="col-sm-8 col-sm-offset-2">
-        <h1>Online Grader</h1>
-        <div class="well">
-           <p>Welcome to the online grader system for the SLSS computer science club. Please familiarize yourself with 
-                the <a href="{{ url_for('rules') }}#contest">contest rules</a>.
-           </p>
+<div class="jumbotron sharp-corner">
+    <h1 class="display-4">SLSS::OJ</h1>
+    <p class="lead">Welcome to the online grader system for the SLSS computer science club. Please familiarize yourself with the
+        <a href="{{ url_for('rules') }}#contest">contest rules</a>.
+    </p>
+    <hr class="my-4">
+    {% if not current_user.is_authenticated %}
+    <p class="lead">
+        <a class="btn btn-primary btn-lg" href="{{ url_for('security.login') }}" role="button">Login</a>
+        <a class="btn btn-light btn-lg" href="{{ url_for('security.register') }}" role="button">Register</a>
+    </p>
+    {% else %}
+    <p class="lead">
+        We have many problems because we are problem makers.
+    </p>
+    <p class="lead">
+        <a class="btn btn-success btn-lg" href="#" role="button">Go to Problems</a>
+    </p>
+    {% endif %}
+</div>
 
-           {% if not current_user.is_authenticated %}
-            <br>
-            <p>
-                <a class="btn btn-primary" href="{{ url_for('security.login') }}">Login</a> <a class="btn btn-default" href="{{ url_for('security.register') }}">Register</a>
-            </p>
-            {% else %}
-            {% if contests %}
-            <br>
-            <div class="table-responsive">         
-                <table class="table">
-                    <thead>
-                    <tr>
-                        <th>Contest</th>
-                        <th>Start Time</th>
-                        <th>End Time</th>
-                        <th></th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    {% for contest in contests %}
-                    {% if contest.is_running() or current_user.has_role('superuser') %}
-                    <tr>
-                        <td>{{ contest.name }}</td>
-                        <td>{{ formatted_datetime(contest.start_time) }}</td>
-                        <td>{{ formatted_datetime(contest.end_time) }}</td>
-                        <td class="text-center"><a class="btn btn-success btn-sm" href="/contest/{{contest.id}}">Enter</a></td>
-                    </tr>
-                    {% endif %}
-                    {% endfor %}
-                    </tbody>
-                </table>
+<div class="my-3 p-3 bg-white rounded box-shadow">
+    <h6 class="border-bottom border-gray pb-2 mb-0">Stream</h6>
+    <div class="text-muted media pt-3">
+        <div class="media-body pb-3 mb-0 small lh-125 border-bottom border-gray">
+            <div class="d-flex justify-content-between align-items-center w-100">
+                <strong class="text-gray">Name</strong>
+                <span></span>
             </div>
-            {% else %}
-            <hr style="background-color: #b2b2b2b2; height: 1px; border: 0px">
-            <p>There are currently no open contests.</p>
-            {% endif %}
-            {% endif %}
+            <span class="d-block">
+            </span>
         </div>
     </div>
 </div>

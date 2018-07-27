@@ -44,8 +44,8 @@ Settings
             <div class="container">
                 <p>Authenticate your Google account in order to create an integration with Google Drive.</p>
                 {% if has_authenticated_with_google() %}
-                    <a class="btn btn-outline-success btn-sharp"><i class="fa fa-check" style="margin-right: 10px"></i>Authenticated</a>
-                    <a class="btn btn-danger btn-sharp" href="{{url_for('revoke_drive_authentication')}}"><i class="fa fa-minus-circle" style="margin-right: 10px"></i>Revoke</a>
+                    <a class="btn btn-outline-success btn-sharp"><i class="fas fa-check" style="margin-right: 10px"></i>Authenticated</a>
+                    <a class="btn btn-danger btn-sharp" href="{{url_for('revoke_drive_authentication')}}"><i class="fas fa-minus-circle" style="margin-right: 10px"></i>Revoke</a>
                 {% else %}
                     <a class="btn btn-success" href="{{ url_for('authenticate_drive') }}">Authenticate</a>
                 {% endif %}

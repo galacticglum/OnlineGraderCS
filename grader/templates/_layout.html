@@ -1,7 +1,7 @@
 {% from "security/_macros.html" import render_field, render_field_with_errors, render_checkbox_field, render_field_with_label %}
 
 {% set navigation_bar = [
-    ('index', 'index', 'Home'),
+    ('contests', 'contests', 'Contests'),
     ('rules', 'rules', 'Rules')
 ] -%}
 
@@ -24,8 +24,12 @@
 
     {% block head_css %}
     <!-- Bootstrap CSS -->
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.2/css/bootstrap.min.css" integrity="sha384-Smlep5jCw/wG7hdkwQ/Z5nLIefveQRIY9nfy6xoR1uRYBtpZgI6339F5dgvm/e9B"
-        crossorigin="anonymous">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.2/css/bootstrap.min.css" 
+        integrity="sha384-Smlep5jCw/wG7hdkwQ/Z5nLIefveQRIY9nfy6xoR1uRYBtpZgI6339F5dgvm/e9B" crossorigin="anonymous">
+
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.2.0/css/all.css" 
+        integrity="sha384-hWVjflwFxL6sNzntih27bfxkr27PmbbK/iSvJ+a4+0owXq79v+lsFkW54bOGbiDQ" crossorigin="anonymous">
+
     <link rel="stylesheet" href="./main.css">
     {% endblock %}
 
@@ -83,7 +87,7 @@
                 <ul class="navbar-nav ml-auto">
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" id="user_dropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                            <i class="glyphicon glyphicon-user"></i>
+                            <i class="fas fa-user"></i>
                             {% if current_user.first_name -%}
                             {{ current_user.first_name }}
                             {% else -%}
