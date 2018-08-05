@@ -1,0 +1,10 @@
+.jumbotron {
+    border-width: 0px 1px 1px 1px;
+    border-color: #e2e5e7;
+    border-style: solid;
+    background-color: white;
+  }
+  
+  nav {
+    border-width: 0px 1px 1px 1px !important;
+  }

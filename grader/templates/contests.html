@@ -4,6 +4,7 @@
 {% block head_css %}
 {{ super() }}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/contests.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/jumbotron_full.css') }}">
 {% endblock %}
 
 {% block page_name %}
@@ -11,7 +12,7 @@ Contests
 {% endblock %}
 
 {% block body %}
-<div class="jumbotron sharp-corner thin-border" style="background-color: white">
+<div class="jumbotron sharp-corner">
     <h1 class="display-4">Contests</h1>
 
     <!-- Running contests -->

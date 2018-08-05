@@ -4,39 +4,236 @@
 Home
 {% endblock %}
 
-{% block body %}
-<div class="jumbotron sharp-corner">
-    <h1 class="display-4">SLSS::OJ</h1>
-    <p class="lead">Welcome to the online grader system for the SLSS computer science club. Please familiarize yourself with the
-        <a href="{{ url_for('rules') }}#contest">contest rules</a>.
-    </p>
-    <hr class="my-4">
-    {% if not current_user.is_authenticated %}
-    <p class="lead">
-        <a class="btn btn-primary btn-lg" href="{{ url_for('security.login') }}" role="button">Login</a>
-        <a class="btn btn-light btn-lg" href="{{ url_for('security.register') }}" role="button">Register</a>
-    </p>
-    {% else %}
-    <p class="lead">
-        We have many problems because we are problem makers.
-    </p>
-    <p class="lead">
-        <a class="btn btn-success btn-lg" href="#" role="button">Go to Problems</a>
-    </p>
-    {% endif %}
+{% block body_header %}
+<div class="jumbotron p-3 p-md-5 text-white rounded bg-dark mt-3">
+    <div class="col-md-6 px-0">
+        <h1 class="display-4 font-italic truncate-block-2 py-1" id="sticky-post-title">Title of a longer featured blog blog blog blog post</h1>
+        <p class="lead my-3 truncate-block-3">Multiple lines of text that form the lede, informing new readers quickly and efficiently about what's most interesting
+            in this post's contents.</p>
+        <p class="lead mb-0">
+            <a href="#" class="text-white font-weight-bold">Continue reading...</a>
+        </p>
+    </div>
 </div>
 
-<div class="my-3 p-3 bg-white rounded box-shadow">
-    <h6 class="border-bottom border-gray pb-2 mb-0">Stream</h6>
-    <div class="text-muted media pt-3">
-        <div class="media-body pb-3 mb-0 small lh-125 border-bottom border-gray">
-            <div class="d-flex justify-content-between align-items-center w-100">
-                <strong class="text-gray">Name</strong>
-                <span></span>
+<div class="row">
+    <div class="col-md-6">
+        <div class="card flex-md-row mb-4 shadow-sm h-md-250" style="max-width: 100%">
+            <div class="card-body d-flex flex-column align-items-start" style="max-width: inherit">
+                <strong class="d-inline-block mb-2 text-primary">Trending</strong>
+                <h3 class="d-inline-block mb-0" style="max-width: inherit">
+                    <a class="truncate-line text-dark" href="#">Sherlock and Array</a>
+                </h3>
+                <div class="mb-1">
+                    <a href="#" class="badge badge-pill badge-danger">algorithms</a>
+                    <a href="#" class="badge badge-pill badge-warning">graphs</a>
+                    <a href="#" class="badge badge-pill badge-info">maths</a>
+                </div>
+                <p id="featured-problem-desc" class="truncate-block-3 card-text mb-auto">
+                    Watson gives Sherlock an array of integers. His challenge is to find an element of the array such that the sum of all elements
+                    to the left is equal to the sum of all elements to the right. For instance, given the array [5,6,8,11],8
+                    is between two subarray that sum to 11. If your starting array is [1], that element satisfies the rule
+                    as left and right sum to 0. You will be given arrays of integers and must determine whether there is
+                    an element that meets the criterion. </p>
+                <a href="#">Solve problem</a>
             </div>
-            <span class="d-block">
-            </span>
+            <!-- <img class="card-img-right flex-auto d-none d-lg-block" data-src="holder.js/200x250?theme=thumb" alt="Card image cap"> -->
         </div>
     </div>
+    <div class="col-md-6">
+        <div class="card flex-md-row mb-4 shadow-sm h-md-250" style="max-width: 100%">
+            <div class="card-body d-flex flex-column align-items-start" style="max-width: inherit">
+                <strong class="d-inline-block mb-2 text-success">Featured Contest</strong>
+                <h3 class="truncate-line mb-0">
+                    <a class="text-dark" href="#">Summer Contest #2</a>
+                </h3>
+                <div class="mb-1 text-muted">
+                    <i>Jul 24, 2018, 00:00 - Jul 30, 2018, 00:00</i>
+                </div>
+                <p class="truncate-block-3 card-text mb-auto">This is a wider card with supporting text below as a natural lead-in to additional content.</p>
+                <a href="#">Join contest</a>
+            </div>
+            <!-- <img class="card-img-right flex-auto d-none d-lg-block" data-src="holder.js/200x250?theme=thumb" alt="Card image cap"> -->
+            <img src="https://i.imgur.com/hGxZnur.png/" alt="Card image cap" class="card-img-right flex-auto d-none d-lg-block" 
+                style="max-width: 200px; max-height: inherit">
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block body %}
+<div class="row">
+    <div class="col-md-8 blog-main">
+        <h3 class="pb-3 mb-4 mt-2 font-italic border-bottom">
+            News
+        </h3>
+
+        <div class="blog-post">
+            <h2 class="blog-post-title">Sample blog post</h2>
+            <p class="blog-post-meta">January 1, 2014 by
+                <a href="#">Mark</a>
+            </p>
+
+            <p>This blog post shows a few different types of content that's supported and styled with Bootstrap. Basic typography,
+                images, and code are all supported.</p>
+            <hr>
+            <p>Cum sociis natoque penatibus et magnis
+                <a href="#">dis parturient montes</a>, nascetur ridiculus mus. Aenean eu leo quam. Pellentesque ornare sem lacinia quam
+                venenatis vestibulum. Sed posuere consectetur est at lobortis. Cras mattis consectetur purus sit amet fermentum.</p>
+            <blockquote>
+                <p>Curabitur blandit tempus porttitor.
+                    <strong>Nullam quis risus eget urna mollis</strong> ornare vel eu leo. Nullam id dolor id nibh ultricies vehicula
+                    ut id elit.</p>
+            </blockquote>
+            <p>Etiam porta
+                <em>sem malesuada magna</em> mollis euismod. Cras mattis consectetur purus sit amet fermentum. Aenean lacinia
+                bibendum nulla sed consectetur.</p>
+            <h2>Heading</h2>
+            <p>Vivamus sagittis lacus vel augue laoreet rutrum faucibus dolor auctor. Duis mollis, est non commodo luctus, nisi
+                erat porttitor ligula, eget lacinia odio sem nec elit. Morbi leo risus, porta ac consectetur ac, vestibulum
+                at eros.</p>
+            <h3>Sub-heading</h3>
+            <p>Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus.</p>
+            <pre><code>Example code block</code></pre>
+            <p>Aenean lacinia bibendum nulla sed consectetur. Etiam porta sem malesuada magna mollis euismod. Fusce dapibus,
+                tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa.</p>
+            <h3>Sub-heading</h3>
+            <p>Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Aenean lacinia bibendum
+                nulla sed consectetur. Etiam porta sem malesuada magna mollis euismod. Fusce dapibus, tellus ac cursus commodo,
+                tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus.</p>
+            <ul>
+                <li>Praesent commodo cursus magna, vel scelerisque nisl consectetur et.</li>
+                <li>Donec id elit non mi porta gravida at eget metus.</li>
+                <li>Nulla vitae elit libero, a pharetra augue.</li>
+            </ul>
+            <p>Donec ullamcorper nulla non metus auctor fringilla. Nulla vitae elit libero, a pharetra augue.</p>
+            <ol>
+                <li>Vestibulum id ligula porta felis euismod semper.</li>
+                <li>Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus.</li>
+                <li>Maecenas sed diam eget risus varius blandit sit amet non magna.</li>
+            </ol>
+            <p>Cras mattis consectetur purus sit amet fermentum. Sed posuere consectetur est at lobortis.</p>
+        </div>
+        <!-- /.blog-post -->
+
+        <div class="blog-post">
+            <h2 class="blog-post-title">Another blog post</h2>
+            <p class="blog-post-meta">December 23, 2013 by
+                <a href="#">Jacob</a>
+            </p>
+
+            <p>Cum sociis natoque penatibus et magnis
+                <a href="#">dis parturient montes</a>, nascetur ridiculus mus. Aenean eu leo quam. Pellentesque ornare sem lacinia quam
+                venenatis vestibulum. Sed posuere consectetur est at lobortis. Cras mattis consectetur purus sit amet fermentum.</p>
+            <blockquote>
+                <p>Curabitur blandit tempus porttitor.
+                    <strong>Nullam quis risus eget urna mollis</strong> ornare vel eu leo. Nullam id dolor id nibh ultricies vehicula
+                    ut id elit.</p>
+            </blockquote>
+            <p>Etiam porta
+                <em>sem malesuada magna</em> mollis euismod. Cras mattis consectetur purus sit amet fermentum. Aenean lacinia
+                bibendum nulla sed consectetur.</p>
+            <p>Vivamus sagittis lacus vel augue laoreet rutrum faucibus dolor auctor. Duis mollis, est non commodo luctus, nisi
+                erat porttitor ligula, eget lacinia odio sem nec elit. Morbi leo risus, porta ac consectetur ac, vestibulum
+                at eros.</p>
+        </div>
+        <!-- /.blog-post -->
+
+        <div class="blog-post">
+            <h2 class="blog-post-title">New feature</h2>
+            <p class="blog-post-meta">December 14, 2013 by
+                <a href="#">Chris</a>
+            </p>
+
+            <p>Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Aenean lacinia bibendum
+                nulla sed consectetur. Etiam porta sem malesuada magna mollis euismod. Fusce dapibus, tellus ac cursus commodo,
+                tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus.</p>
+            <ul>
+                <li>Praesent commodo cursus magna, vel scelerisque nisl consectetur et.</li>
+                <li>Donec id elit non mi porta gravida at eget metus.</li>
+                <li>Nulla vitae elit libero, a pharetra augue.</li>
+            </ul>
+            <p>Etiam porta
+                <em>sem malesuada magna</em> mollis euismod. Cras mattis consectetur purus sit amet fermentum. Aenean lacinia
+                bibendum nulla sed consectetur.</p>
+            <p>Donec ullamcorper nulla non metus auctor fringilla. Nulla vitae elit libero, a pharetra augue.</p>
+        </div>
+        <!-- /.blog-post -->
+
+        <nav class="blog-pagination">
+            <a class="btn btn-outline-primary" href="#">Older</a>
+            <a class="btn btn-outline-secondary disabled" href="#">Newer</a>
+        </nav>
+
+    </div>
+    <!-- /.blog-main -->
+
+    <aside class="col-md-4 blog-sidebar">
+        <div class="p-3 mb-3 bg-light rounded">
+            <h4 class="font-italic">About</h4>
+            <p class="mb-0">Etiam porta
+                <em>sem malesuada magna</em> mollis euismod. Cras mattis consectetur purus sit amet fermentum. Aenean lacinia
+                bibendum nulla sed consectetur.</p>
+        </div>
+
+        <div class="p-3">
+            <h4 class="font-italic">Archives</h4>
+            <ol class="list-unstyled mb-0">
+                <li>
+                    <a href="#">March 2014</a>
+                </li>
+                <li>
+                    <a href="#">February 2014</a>
+                </li>
+                <li>
+                    <a href="#">January 2014</a>
+                </li>
+                <li>
+                    <a href="#">December 2013</a>
+                </li>
+                <li>
+                    <a href="#">November 2013</a>
+                </li>
+                <li>
+                    <a href="#">October 2013</a>
+                </li>
+                <li>
+                    <a href="#">September 2013</a>
+                </li>
+                <li>
+                    <a href="#">August 2013</a>
+                </li>
+                <li>
+                    <a href="#">July 2013</a>
+                </li>
+                <li>
+                    <a href="#">June 2013</a>
+                </li>
+                <li>
+                    <a href="#">May 2013</a>
+                </li>
+                <li>
+                    <a href="#">April 2013</a>
+                </li>
+            </ol>
+        </div>
+
+        <div class="p-3">
+            <h4 class="font-italic">Elsewhere</h4>
+            <ol class="list-unstyled">
+                <li>
+                    <a href="#">GitHub</a>
+                </li>
+                <li>
+                    <a href="#">Twitter</a>
+                </li>
+                <li>
+                    <a href="#">Facebook</a>
+                </li>
+            </ol>
+        </div>
+    </aside>
+    <!-- /.blog-sidebar -->
+
 </div>
 {% endblock body %}
