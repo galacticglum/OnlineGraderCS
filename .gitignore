@@ -107,7 +107,6 @@ venv.bak/
 # instance has secret config entries
 instance/
 
-aws-env/
 files/
 
 # Elastic Beanstalk Files

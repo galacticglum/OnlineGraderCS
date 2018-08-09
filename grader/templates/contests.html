@@ -12,73 +12,69 @@ Contests
 {% endblock %}
 
 {% block body %}
-<div class="jumbotron sharp-corner">
-    <h1 class="display-4">Contests</h1>
-
-    <!-- Running contests -->
-    <hr style="background-color: #b2b2b2b2; height: 1px; border: 0px">
-    <h4>Running Contests</h4>
-    <hr style="margin-top: 1px">
-    {% if display_open_contests %}
-    <div class="table-responsive">         
-        <table class="table table-bordered">
-            <thead class="thead-light">
-            <tr>
-                <th>Contest</th>
-                <th>Start Time</th>
-                <th>End Time</th>
-                <th></th>
-            </tr>
-            </thead>
-            <tbody>
-            {% for contest in contests %}
-            {% if contest.is_running() %}
-            <tr>
-                <td>{{ contest.name }}</td>
-                <td>{{ formatted_datetime(contest.start_time) }}</td>
-                <td>{{ formatted_datetime(contest.end_time) }}</td>
-                <td class="text-center"><a class="btn btn-success btn-sm" href="/contest/{{contest.id}}">Enter</a></td>
-            </tr>
-            {% endif %}
-            {% endfor %}
-            </tbody>
-        </table>
-    </div>
-    {% else %}
-    <p class="my-2"><i>There are currently no contests running.</i></p>
-    {% endif %}
-
-    <!-- Past contests -->
-    <br>
-    <h4 id="runningContestLabel">Past Contests</h4>
-    <hr style="margin-top: 1px">
-    {% if contests %}
-    <div class="table-responsive my-2">   
-        <table class="table table-curved">
-            <thead class="thead-light">
-            <tr>
-                <th>Contest</th>
-                <th>Start Time</th>
-                <th>End Time</th>
-                <th></th>
-            </tr>
-            </thead>
-            <tbody>
-            {% for contest in contests %}
-            {% if contest.has_expired() %}
-            <tr>
-                <td>{{ contest.name }}</td>
-                <td>{{ formatted_datetime(contest.start_time) }}</td>
-                <td>{{ formatted_datetime(contest.end_time) }}</td>
-                <td class="text-center"><a class="btn btn-success btn-sm" href="/contest/{{contest.id}}">Enter</a></td>
-            </tr>
-            {% endif %}
-            {% endfor %}
-            </tbody>
-        </table>
-    </div>
-    {% else %}
-    <p class="my-4"><i>There have been no contests in the history of the universe.</i></p>
-    {% endif %}
+<h1 class="display-4">Contests</h1>
+<!-- Running contests -->
+<hr style="background-color: #b2b2b2b2; height: 1px; border: 0px">
+<h4>Running Contests</h4>
+<hr style="margin-top: 1px">
+{% if display_open_contests %}
+<div class="table-responsive">         
+    <table class="table table-bordered">
+        <thead class="thead-light">
+        <tr>
+            <th>Contest</th>
+            <th>Start Time</th>
+            <th>End Time</th>
+            <th></th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for contest in contests %}
+        {% if contest.is_running() %}
+        <tr>
+            <td>{{ contest.name }}</td>
+            <td>{{ formatted_datetime(contest.start_time) }}</td>
+            <td>{{ formatted_datetime(contest.end_time) }}</td>
+            <td class="text-center"><a class="btn btn-success btn-sm" href="/contest/{{contest.id}}">Enter</a></td>
+        </tr>
+        {% endif %}
+        {% endfor %}
+        </tbody>
+    </table>
 </div>
+{% else %}
+<p class="my-2"><i>There are currently no contests running.</i></p>
+{% endif %}
+<!-- Past contests -->
+<br>
+<h4 id="runningContestLabel">Past Contests</h4>
+<hr style="margin-top: 1px">
+{% if contests %}
+<div class="table-responsive my-2">   
+    <table class="table table-curved">
+        <thead class="thead-light">
+        <tr>
+            <th>Contest</th>
+            <th>Start Time</th>
+            <th>End Time</th>
+            <th></th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for contest in contests %}
+        {% if contest.has_expired() %}
+        <tr>
+            <td>{{ contest.name }}</td>
+            <td>{{ formatted_datetime(contest.start_time) }}</td>
+            <td>{{ formatted_datetime(contest.end_time) }}</td>
+            <td class="text-center"><a class="btn btn-success btn-sm" href="/contest/{{contest.id}}">Enter</a></td>
+        </tr>
+        {% endif %}
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<p class="my-4"><i>There have been no contests in the history of the universe.</i></p>
+{% endif %}
 {% endblock %}
