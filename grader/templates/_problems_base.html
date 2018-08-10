@@ -1,6 +1,17 @@
 {% extends '_layout.html' %}
 {% set active_page = "problems" %}
 
+<!-- name, icon, route -->
+{% set sort_options = [
+    ('Trending', 'fas fa-fire', 'problems_trending'),
+    ('Alphabetical', 'fas fa-sort-alpha-down', 'problems_alphabetical'),
+    ('Difficulty', 'far fa-lightbulb', 'problems_difficulty'),
+    ('Acceptance', 'fas fa-percent', 'problems_acceptance'),
+    ('Completion', 'fas fa-check', 'problems_completion')
+] -%}
+
+{% set active_sort_option = active_sort_option|default('Trending') -%}
+
 {% macro gen_pagination() %}
 {% if pagination_entries %}
 <ul class="pagination">
@@ -60,49 +71,33 @@ Problems
 
             <div class="d-flex flex-row utility-bar px-4 align-items-center">
                 <span class="header-text smallcaps">Sort</span>
-                <button class="btn btn-sm sort-option-button mr-1 py-0 my-0 align-items-center text-primary" type="button" id="sort-menu-button"
+
+                {% for name, icon, _ in sort_options %}
+                {% if name == active_sort_option %}
+                    <button class="btn btn-sm sort-option-button mr-1 py-0 my-0 align-items-center text-primary" type="button" id="sort-menu-button"
                     data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                    <i class="fas fa-fire"></i>
-                    <span class="my-auto ml-1">
-                        <strong>Trending</strong>
-                    </span>
-                </button>
+                        <i class="{{icon}}"></i>
+                        <span class="my-auto ml-1">
+                            <strong>{{name}}</strong>
+                        </span>
+                    </button>
+                {% endif %}
+                {% endfor %}
 
                 <div class="dropdown-menu" id="sort-menu-dropdown" aria-labelledby="sort-menu-button">
-                    <a class="dropdown-item dropdown-item-active" href="?sortby=trend">
-                        <i class="fas fa-fire"></i>
-                        <span class="my-auto ml-1">
-                            <strong>Trending</strong>
-                        </span>
-                    </a>
+                    {% for name, icon, route in sort_options %}
+                        <a class="dropdown-item {% if name == active_sort_option %}dropdown-item-active{% endif %}" href="{{url_for(route)}}">
+                            <i class="{{icon}}"></i>
+                            <span class="my-auto ml-1">
+                                <strong>{{name}}</strong>
+                            </span>
+                        </a>                  
+                    {% endfor %}
+                </div>
 
-                    <a class="dropdown-item" href="?sortby=alpha">
-                        <i class="fas fa-sort-alpha-down"></i>
-                        <span class="my-auto ml-1">
-                            <strong>Alphabetical</strong>
-                        </span>
-                    </a>
-
-                    <a class="dropdown-item" href="?sortby=difficulty">
-                        <i class="far fa-lightbulb"></i>
-                        <span class="my-auto ml-1">
-                            <strong>Difficulty</strong>
-                        </span>
-                    </a>
-
-                    <a class="dropdown-item" href="?sortby=acceptance">
-                        <i class="fas fa-percent"></i>
-                        <span class="my-auto ml-1">
-                            <strong>Acceptance</strong>
-                        </span>
-                    </a>
-
-                    <a class="dropdown-item" href="?sortby=completion">
-                        <i class="fas fa-check"></i>
-                        <span class="my-auto ml-1">
-                            <strong>Completion</strong>
-                        </span>
-                    </a>
+                <div class="d-flex flex-row utility-bar align-items-center">
+                    {% block sorting_options %}
+                    {% endblock %}
                 </div>
             </div>
         </div>

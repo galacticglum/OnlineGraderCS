@@ -73,20 +73,60 @@ def contests():
 
     return render_template('contests.html', contests=contests, display_open_contests=display_open_contests)    
 
-@application.route('/problems')
-def problems():
+def get_problem_query():
+    return db.session.query(Problem).filter(~Problem.contests.any())
+
+def get_problems(query, route):
     page = request.args.get('page', default=1, type=int)
     if page < 1:
-        return redirect(pagination_lib.get_url_with_page('problems', 1))
+        return redirect(pagination_lib.get_url_with_page(route, 1))
 
-    all_problems = db.session.query(Problem).filter(~Problem.contests.any()).all()
+    all_problems = query.all()
     max_page = pagination_lib.get_max_page(len(all_problems))
 
     if page > max_page:
-        return redirect(pagination_lib.get_url_with_page('problems', max_page))
+        return redirect(pagination_lib.get_url_with_page(route, max_page))
 
-    pagination_entries, problems_on_page = pagination_lib.paginate(all_problems, page)
-    return render_template('problems.html', problems=problems_on_page, pagination_entries=pagination_entries)
+    pagination_entries, items_on_page = pagination_lib.paginate(all_problems, page, route)
+    return {'pagination_entries' : pagination_entries, 'problems' : items_on_page }
+
+@application.route('/problems/trending')
+def problems_trending():
+    query = get_problem_query()
+    return render_template('problems_trending.html', **get_problems(query, 'problems_trending'))
+
+@application.route('/problems/alphabetical', defaults={'direction': 'az'})
+@application.route('/problems/alphabetical/<direction>')
+def problems_alphabetical(direction):
+    query = get_problem_query()
+
+    if direction == 'az':
+        query = query.order_by(Problem.name)
+    elif direction == 'za':
+        query = query.order_by(Problem.name.desc())
+    else:
+        return redirect(url_for('problems_alphabetical'))
+
+    return render_template('problems_alphabetical.html', **get_problems(query, 'problems_alphabetical'), sorted_az=(direction == 'az'))
+
+@application.route('/problems/difficulty')
+def problems_difficulty():
+    query = get_problem_query()
+    return render_template('problems_alphabetical.html', **get_problems(query, 'problems_difficulty'))
+
+@application.route('/problems/acceptance')
+def problems_acceptance():
+    query = get_problem_query()
+    return render_template('problems_alphabetical.html', **get_problems(query, 'problems_acceptance'))
+
+@application.route('/problems/completion')
+def problems_completion():
+    query = get_problem_query()
+    return render_template('problems_alphabetical.html', **get_problems(query, 'problems_completion'))
+
+@application.route('/problems')
+def problems():
+    return redirect(url_for('problems_trending'))
 
 @application.route('/contest/<int:contest_id>', methods=['GET', 'POST'])
 @login_required

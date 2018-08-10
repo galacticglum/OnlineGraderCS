@@ -36,7 +36,7 @@ def make_entry_for_page(current_page_num, page_num, url):
     state = PaginationState.active if page_num == current_page_num else PaginationState.enabled
     return PaginationEntry(page_num, state, url)
 
-def paginate(items, page_num):
+def paginate(items, page_num, route):
     if items == None or len(items) == 0: return None, None
 
     max_page = get_max_page(len(items))
@@ -44,10 +44,10 @@ def paginate(items, page_num):
     
     super_prev_pagination_state = PaginationState.disabled if page_num <= 5 else PaginationState.enabled
     super_prev_pagination_entry = PaginationEntry('<i class="fas fa-angle-double-left"></i>', super_prev_pagination_state,  
-                                                    get_url_with_page('problems', page_num - 5))
+                                                    get_url_with_page(route, page_num - 5))
 
     prev_pagination_state = PaginationState.disabled if page_num == 1 else PaginationState.enabled
-    prev_pagination_entry = PaginationEntry('<i class="fas fa-angle-left"></i>', prev_pagination_state,  get_url_with_page('problems', page_num - 1))
+    prev_pagination_entry = PaginationEntry('<i class="fas fa-angle-left"></i>', prev_pagination_state,  get_url_with_page(route, page_num - 1))
 
     entries = [super_prev_pagination_entry, prev_pagination_entry]
 
@@ -55,28 +55,28 @@ def paginate(items, page_num):
 
     if max_page <= MAX_PAGINATION_ENTRIES:
         for i in range(1, max_page + 1):
-            entries.append(make_entry_for_page(page_num, i, get_url_with_page('problems', i)))
+            entries.append(make_entry_for_page(page_num, i, get_url_with_page(route, i)))
     else:
-        entries.append(make_entry_for_page(page_num, 1, get_url_with_page('problems', 1)))
+        entries.append(make_entry_for_page(page_num, 1, get_url_with_page(route, 1)))
         if page_num > 4:
             entries.append(ELLPSIS_ENTRY)
 
             if page_num < max_page - 4:
-                entries.append(make_entry_for_page(page_num, page_num - 1, get_url_with_page('problems', page_num - 1)))
-                entries.append(make_entry_for_page(page_num, page_num, get_url_with_page('problems', page_num)))
-                entries.append(make_entry_for_page(page_num, page_num + 1, get_url_with_page('problems', page_num + 1)))
+                entries.append(make_entry_for_page(page_num, page_num - 1, get_url_with_page(route, page_num - 1)))
+                entries.append(make_entry_for_page(page_num, page_num, get_url_with_page(route, page_num)))
+                entries.append(make_entry_for_page(page_num, page_num + 1, get_url_with_page(route, page_num + 1)))
                 entries.append(ELLPSIS_ENTRY)
             else:
                 for i in range(4, 0, -1):
                     page = max_page - i
-                    entries.append(make_entry_for_page(page_num, page, get_url_with_page('problems', page)))
+                    entries.append(make_entry_for_page(page_num, page, get_url_with_page(route, page)))
         else:
             for i in range(2, 7):
-                entries.append(make_entry_for_page(page_num, i, get_url_with_page('problems', i)))
+                entries.append(make_entry_for_page(page_num, i, get_url_with_page(route, i)))
 
             entries.append(ELLPSIS_ENTRY)
 
-        entries.append(make_entry_for_page(page_num, max_page, get_url_with_page('problems', max_page)))
+        entries.append(make_entry_for_page(page_num, max_page, get_url_with_page(route, max_page)))
         
 
     next_pagination_state = PaginationState.disabled if page_num == max_page else PaginationState.enabled
