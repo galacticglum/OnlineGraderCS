@@ -18,6 +18,18 @@ import grader.pagination as pagination_lib
 import google.oauth2.credentials
 import google_auth_oauthlib.flow
 
+@application.errorhandler(404)
+def page_not_found(e):
+    return render_template('404.html'), 404
+
+# @application.errorhandler(403)
+# def forbidden(e):
+#     return render_template('403.html'), 403
+
+# @application.errorhandler(500)
+# def forbidden(e):
+#     return render_template('500.html'), 500
+
 def get_contests():
     contests = db.session.query(Contest)
 
