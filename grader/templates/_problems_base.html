@@ -94,11 +94,11 @@ Problems
                         </a>                  
                     {% endfor %}
                 </div>
+            </div>
 
-                <div class="d-flex flex-row utility-bar align-items-center">
-                    {% block sorting_options %}
-                    {% endblock %}
-                </div>
+            <div class="d-flex flex-row utility-bar align-items-center">
+                {% block sorting_options %}
+                {% endblock %}
             </div>
         </div>
     </div>
@@ -265,6 +265,7 @@ Problems
         }
 
         change_view_type(Cookies.get('table'));
+
         $('.blog-pagination').show();
         $('body').show();
     });

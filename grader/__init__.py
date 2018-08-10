@@ -47,6 +47,7 @@ except OSError:
 
 # This import will register all the routes, and it MUST be after we create the application
 import grader.routes
+import grader.problem_routes
 
 # define a context processor for merging flask-admin's template context into the
 # flask-security and app views.
