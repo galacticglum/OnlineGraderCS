@@ -8,8 +8,6 @@ from flask_migrate import Migrate
 from flask_security import Security, SQLAlchemyUserDatastore
 from grader.forms import ExtendedLoginForm, ExtendedRegisterForm
 
-from sqlalchemy.event import listens_for
-
 # Create Flask application
 application = Flask(__name__, instance_relative_config=True, instance_path=os.path.join(os.path.dirname(os.path.realpath(__main__.__file__)), 'instance'))
 application.config.from_object('default_settings')

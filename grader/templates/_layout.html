@@ -1,7 +1,7 @@
 {% from "security/_macros.html" import render_field, render_field_with_errors, render_checkbox_field, render_field_with_label %}
 
 {% set navigation_bar = [
-    ('index', '#', 'Problems'),
+    ('problems', 'problems', 'Problems'),
     ('contests', 'contests', 'Contests'),
     ('index', '#', 'Ranks'),
     ('index', '#', 'About')
@@ -14,7 +14,7 @@
 <head>
     <title>
         {% block title %}
-        {% if self.page_name() %} {% block page_name %}{% endblock %} -{% endif %} Online Grader 
+        {% if self.page_name() %} {% block page_name %}{% endblock %} -{% endif %} Online Grader
         {% endblock %}
     </title>
 
@@ -45,6 +45,12 @@
 </head>
 
 <body>
+    {% block noscript_banner %}
+    <noscript>
+        <div id="noscript">This site requires JavaScript to fully function!</div>
+    </noscript>
+    {% endblock %}
+
     {% block page_body %}
     <div class="content">
         <div class="container">
@@ -141,10 +147,12 @@
             {% endblock %}
         </div>
 
+        {% block body_outer %}
         <main role="main" class="container">
             {% block body %}
             {% endblock %}
         </main>
+        {% endblock %}
     </div>
     {% endblock %}
 

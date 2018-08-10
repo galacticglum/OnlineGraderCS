@@ -4,7 +4,7 @@ import json
 import shutil
 
 from grader import application, db
-from grader.models import User, ContestParticipation, TestRun, Testcase, Problem, Contest, Submission, GoogleCredentials
+from grader.models import User, Problem, Contest, GoogleCredentials
 from flask_security import current_user
 
 def run_subprocess_safe(args, input_data=None, timeout=None):
@@ -146,3 +146,10 @@ def get_contest_name(contest_id):
 
     return contest.name
 
+def clamp(value, min_value, max_value):
+    if value < min_value:
+        return min_value
+    elif value > max_value:
+        return max_value
+    else:
+        return value

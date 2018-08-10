@@ -83,7 +83,7 @@ html body {
 
 /* Pagination */
 
-.blog-pagination {
+.blog-pagination-bottom {
     margin-bottom: 4rem;
 }
 
@@ -147,6 +147,8 @@ html body {
     margin: 10px;
 }
 
+/* Truncate utilities */
+
 .truncate-block-3 {
     overflow: hidden;
     display: -webkit-box;
@@ -154,8 +156,6 @@ html body {
     -webkit-box-orient: vertical;
     -webkit-box-pack: end;
 }
-
-/* Truncate utilities */
 
 .truncate-block-2 {
     overflow: hidden;
@@ -170,4 +170,34 @@ html body {
     -webkit-line-clamp: 1;
     -webkit-box-orient: vertical;
     -webkit-box-pack: end;
+}
+
+/* Card toc utilities */
+.card-toc {
+    border-style: solid !important;
+    border-left: 4px;
+}
+
+.card-toc-danger {
+    border-left-color: #ff4444;
+}
+
+.card-toc-warning {
+    border-left-color: #ffbb33;
+}
+
+.card-toc-success {
+    border-left-color: #00C851;
+}
+
+#noscript {
+    font-size: 120%;
+    color: white;
+    font-weight: 700;
+    background: #ae0000;
+    text-align: center;
+    padding: 5px 0;
+    left: 0;
+    right: 0;
+    z-index: 100;
 }

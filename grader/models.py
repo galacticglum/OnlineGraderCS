@@ -1,11 +1,19 @@
 from grader import db
 from flask_security import UserMixin, RoleMixin
+
 import datetime
+import enum
 
 roles_users = db.Table(
     'roles_users',
     db.Column('user_id', db.Integer, db.ForeignKey('user.id')),
     db.Column('role_id', db.Integer, db.ForeignKey('role.id'))
+)
+
+problem_contests = db.Table(
+    'problem_contests',
+    db.Column('problem_id', db.Integer, db.ForeignKey('problem.id')),
+    db.Column('contest_id', db.Integer, db.ForeignKey('contest.id'))
 )
 
 class Role(db.Model, RoleMixin):
@@ -15,7 +23,6 @@ class Role(db.Model, RoleMixin):
 
     def __str__(self):
         return self.name
-
 
 class User(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
@@ -34,12 +41,42 @@ class User(db.Model, UserMixin):
     def __str__(self):
         return self.email
 
+class ProblemDifficultyType(enum.Enum):
+    easy = 0,
+    medium = 1,
+    hard  = 2
+
+    def __str__(self):
+        return self.name.capitalize()
+
+    def to_html_str(self):
+        if self == ProblemDifficultyType.easy:
+            return 'success'
+        elif self == ProblemDifficultyType.medium:
+            return 'warning'
+        elif self == ProblemDifficultyType.hard:
+            return 'danger'
+
+class Problem(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(255))
+    description = db.Column(db.Text)
+    points = db.Column(db.Integer)
+    difficulty = db.Column(db.Enum(ProblemDifficultyType))
+    contests = db.relationship('Contest', secondary=problem_contests,
+                                back_populates='problems')
+
+    def __str__(self):
+        return self.name
+
 class Contest(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(255), unique=True)
     start_time = db.Column(db.DateTime)
     end_time = db.Column(db.DateTime)
     duration_minutes = db.Column(db.Integer)
+    problems = db.relationship('Problem', secondary=problem_contests,
+                                back_populates='contests')
 
     def has_started(self):
         return datetime.datetime.now() > self.start_time
@@ -55,84 +92,6 @@ class Contest(db.Model):
 
     def __str__(self):
         return self.name
-
-class Problem(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(255))
-    pdf_link = db.Column(db.String(2083))
-    total_points = db.Column(db.Integer)
-    contest_id = db.Column(db.Integer, db.ForeignKey(Contest.id))
-    contest = db.relationship('Contest', backref=db.backref('problems', lazy='dynamic'))
-
-    def __str__(self):
-        return self.name
-
-class Testcase(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(255))
-    input_data = db.Column(db.Text)
-    output_data = db.Column(db.Text)
-    score_weight = db.Column(db.Integer)
-    problem_id = db.Column(db.Integer, db.ForeignKey(Problem.id))
-    problem = db.relationship('Problem', backref=db.backref('testcases', lazy='dynamic'))
-
-    def matches(expected_output, real_output):
-        if len(expected_output) != len(real_output): return False
-        for i in range(len(expected_output)):
-            if real_output[i] != expected_output[i]: return False
-
-        return True
-
-    def __str__(self):
-        return self.name
-
-class ContestParticipation(db.Model):
-    user_id = db.Column(db.Integer, primary_key=True)
-    contest_id = db.Column(db.Integer, primary_key=True)
-    join_time = db.Column(db.DateTime)
-
-class Submission(db.Model):
-    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    user_id = db.Column(db.Integer)
-    problem_id = db.Column(db.Integer)
-    time = db.Column(db.DateTime)
-    code = db.Column(db.Text)
-    language = db.Column(db.Integer)
-    score = db.Column(db.Integer)
-    compiler_output = db.Column(db.Text)
-
-    def get_language_name(self):
-        if self.language == 0:
-            return 'Python'
-        
-        if self.language == 1:
-            return 'C#'
-
-        if self.language == 2:
-            return 'Java'
-
-    def __str__(self):
-        import grader.utilities
-        return '#{0} at {1}'.format(self.id, grader.utilities.get_formatted_datetime(self.time))
-
-class TestRun(db.Model):
-    testcase_id = db.Column(db.Integer, primary_key=True)
-    submission_id = db.Column(db.Integer, primary_key=True)
-    status = db.Column(db.Integer)
-    output = db.Column(db.Text)
-
-    def get_status_name(self):
-        if self.status == 1:
-            return "Correct"
-
-        if self.status == 0:
-            return "Pending"
-
-        if self.status == -1 or self.status == -3:
-            return "Failed"
-
-        if self.status == -2:
-            return "Timeout"
 
 class GoogleCredentials(db.Model):
     user_id = db.Column(db.Integer, primary_key=True)

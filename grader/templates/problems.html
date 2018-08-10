@@ -1,0 +1,313 @@
+{% extends '_layout.html' %}
+{% set active_page = "problems" %}
+
+{% macro gen_pagination() %}
+{% if pagination_entries %}
+<ul class="pagination">
+    {% for entry in pagination_entries %}
+    <li class="page-item {{entry.state.to_html_str()}}">
+        <a class="page-link" href="{{entry.href}}">{{entry.value}}</a>
+    </li>
+    {% endfor%}
+</ul>
+{% endif %}
+{% endmacro %}
+
+{% block page_name %}
+Problems
+{% endblock %}
+
+{% block head_css %}
+{{ super() }}
+<!-- Vendor imports -->
+<link rel="stylesheet" href="{{ url_for('static', filename='vendor/tagsinput/tagsinput.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='vendor/ion.rangeSlider/ion.rangeSlider.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='vendor/ion.rangeSlider/ion.rangeSlider.skinModern-custom.css') }}">
+
+<link rel="stylesheet" href="{{ url_for('static', filename='css/problems.css') }}">
+<style>
+    body {
+        display: none;
+    }
+</style>
+{% endblock %}
+
+{% block body_outer %}
+<div class="container py-3 mb-0">
+    <h3 class="my-0 font-italic">
+        Problems
+    </h3>
+</div>
+
+<div class="container px-0 pb-4" id="utility-bar">
+    <div class="bg-white border-bottom border-top">
+        <div class="d-flex flex-row">
+            <div class="d-flex flex-row utility-bar align-items-center my-2 px-4 border-right">
+                <span class="header-text smallcaps">View</span>
+                <button class="btn btn-sm view-button mr-1 py-0 my-0" data-toggle="tooltip" 
+                    data-placement="top" title="Card" data-delay='{"show":"1500"}'
+                    id="card-view-btn" onclick="this.blur();">
+
+                    <i class="fas fa-bars" id="card-view-btn-icon"></i>
+                </button>
+                <button class="btn btn-sm view-button py-0 my-0" data-toggle="tooltip" 
+                    data-placement="top" title="Table" data-delay='{"show":"1500"}'
+                    id="table-view-btn" onclick="this.blur();">
+                    
+                    <i class="fas fa-table" id="table-view-btn-icon"></i>
+                </button>
+            </div>
+
+            <div class="d-flex flex-row utility-bar px-4 align-items-center">
+                <span class="header-text smallcaps">Sort</span>
+                <button class="btn btn-sm sort-option-button mr-1 py-0 my-0 align-items-center text-primary" type="button" id="sort-menu-button"
+                    data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    <i class="fas fa-fire"></i>
+                    <span class="my-auto ml-1">
+                        <strong>Trending</strong>
+                    </span>
+                </button>
+
+                <div class="dropdown-menu" id="sort-menu-dropdown" aria-labelledby="sort-menu-button">
+                    <a class="dropdown-item dropdown-item-active" href="?sortby=trend">
+                        <i class="fas fa-fire"></i>
+                        <span class="my-auto ml-1">
+                            <strong>Trending</strong>
+                        </span>
+                    </a>
+
+                    <a class="dropdown-item" href="?sortby=alpha">
+                        <i class="fas fa-sort-alpha-down"></i>
+                        <span class="my-auto ml-1">
+                            <strong>Alphabetical</strong>
+                        </span>
+                    </a>
+
+                    <a class="dropdown-item" href="?sortby=difficulty">
+                        <i class="far fa-lightbulb"></i>
+                        <span class="my-auto ml-1">
+                            <strong>Difficulty</strong>
+                        </span>
+                    </a>
+
+                    <a class="dropdown-item" href="?sortby=acceptance">
+                        <i class="fas fa-percent"></i>
+                        <span class="my-auto ml-1">
+                            <strong>Acceptance</strong>
+                        </span>
+                    </a>
+
+                    <a class="dropdown-item" href="?sortby=completion">
+                        <i class="fas fa-check"></i>
+                        <span class="my-auto ml-1">
+                            <strong>Completion</strong>
+                        </span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<main role="main" class="my-0 py-0 container">
+    <div class="row">
+        <div class="col-md-8 blog-main">
+            <div class="d-flex flex-column blog-post">
+                <div id="card-view">
+                    <!-- Generate card view html -->
+                    {% for problem in problems %}
+                        <div class="card card-toc card-toc-{{problem.difficulty.to_html_str()}} mb-2">
+                            <div class="card-body py-2">
+                                <div class="d-flex flex-row">
+                                    <h4 class="truncate-line mb-0 pb-1 mr-auto">
+                                        <a class="text-dark" href="#">{{problem.name}}</a>
+                                    </h4>
+    
+                                    <span class="badge badge-{{problem.difficulty.to_html_str()}} my-auto">{{problem.difficulty}}</span>
+                                </div>
+    
+                                <div class="d-flex flex-row">
+                                    {% if problem.description %}
+                                    <button type="button" class="desc-preview-btn btn btn-sm mr-2">
+                                        <i style="color:white" class="fas fa-align-left"></i>
+                                    </button>
+                                    {% endif %}
+    
+                                    <div class="text-muted align-self-end">
+                                        <a href="#" class="badge" style="color: #619b67">
+                                            <i class="fas fa-check mr-2"></i>Solved
+                                        </a>
+                                    </div>
+
+                                    <div class="text-muted ml-auto align-self-end">
+                                        <i>80.5% Acceptance</i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {% if problem.description %}
+                        <div class="card border-info desc-preview-content ml-4 my-2">
+                            <div class="card-body truncate-block-2 py-2">
+                                {{problem.description}}
+                            </div>
+                        </div>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+
+                <!-- Generate table view html -->
+                <table id="table-view" class="table table-hover table-sm mb-0">
+                    <thead class="thead-light">
+                        <tr>
+                            <th scope="col" style="width: 50%">Name</th>
+                            <th scope="col" style="width: 15%">Acceptance</th>
+                            <th scope="col" style="width: 15%">Difficulty</th>
+                            <th scope="col" style="width: 15%">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for problem in problems %}
+                            <tr>
+                                <td>
+                                    <a href="">{{problem.name}}</a>
+                                </td>
+                                <td>80.5%</td>
+                                <td>
+                                    <span class="badge badge-{{problem.difficulty.to_html_str()}}">{{problem.difficulty}}</span>
+                                </td>
+                                <td>
+                                    <a href="#" class="badge" style="color: #619b67">
+                                        <i class="fas fa-check mr-2"></i>Solved
+                                    </a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <nav class="blog-pagination blog-pagination-bottom">
+                {{ gen_pagination() }}
+            </nav>
+
+            <!-- <nav class="blog-pagination">
+                <a class="btn btn-outline-primary" href="#">Older</a>
+                <a class="btn btn-outline-secondary disabled" href="#">Newer</a>
+            </nav> -->
+
+        </div>
+        <!-- /.blog-main -->
+
+        <aside class="col-md-4 blog-sidebar">
+            <div class="card mb-4">
+                <h5 class="card-header">Search</h5>
+                <div class="card-body px-3 py-3 d-flex flex-column">
+                    <input type="text" class="form-control" placeholder="Search problems...">
+                    <div class="form-check mt-2">
+                        <input class="form-check-input" type="checkbox" value="" id="defaultCheck1">
+                        <label class="form-check-label" for="defaultCheck1">
+                            Hide completed problems
+                        </label>
+                    </div>
+
+                    <div class="mt-2">
+                        <span><i>Tags</i></span>
+                        <div class="mt-1"><input type="text" id="search-tags" placeholder="Filter by tags..." data-role="tagsinput"></div>
+                    </div>
+
+                    <div class="mt-3">
+                        <span><i>Acceptance Range</i></span>
+                        <input id="acceptance-range-slider">     
+                    </div>
+
+                    
+                    <hr class="w-100">
+                    <a href="#" class="ml-auto btn btn-primary">Go</a>
+                </div>
+            </div>
+        </aside>
+        <!-- /.blog-sidebar -->
+
+    </div>
+    <!-- /.row -->
+
+</main>
+<!-- /.container -->
+{% endblock %}
+
+{% block tail %}
+<script src="https://cdn.jsdelivr.net/npm/js-cookie@2/src/js.cookie.min.js"></script>
+<script src="{{ url_for('static', filename='vendor/tagsinput/tagsinput.js') }}"></script>
+<script src="{{ url_for('static', filename='vendor/ion.rangeSlider/ion.rangeSlider.min.js') }}"></script>
+
+<script>
+    $(function () {
+        $('[data-toggle="tooltip"]').tooltip()
+    });
+
+    function change_view_type(is_table) {
+        if (is_table == 'true') {
+            $('#card-view').hide();
+            $('#table-view').show();
+
+            $('#card-view-btn-icon').removeClass('view-btn-active');
+            $('#table-view-btn-icon').addClass('view-btn-active');
+
+        }
+        else {
+            $('#card-view').show();
+            $('#table-view').hide();
+
+            $('#card-view-btn-icon').addClass('view-btn-active');
+            $('#table-view-btn-icon').removeClass('view-btn-active');
+        }
+    }
+
+    $(document).ready(function () {
+        if (typeof (Cookies.get('table')) == 'undefined') {
+            Cookies.set('table', 'false');
+        }
+
+        change_view_type(Cookies.get('table'));
+        $('.blog-pagination').show();
+        $('body').show();
+    });
+
+    $('#card-view-btn').click(function () {
+        Cookies.set('table', 'false');
+        change_view_type('false');
+    });
+
+    $('#table-view-btn').click(function () {
+        Cookies.set('table', 'true');
+        change_view_type('true');
+    });
+
+    $("#acceptance-range-slider").ionRangeSlider({
+        type: "double",
+        min: 1,
+        max: 100,
+        from: 1,
+        to: 100,
+        postfix: "%"
+    });
+
+    var desc_preview_elements = document.getElementsByClassName('desc-preview-btn');
+    for (var i = 0; i < desc_preview_elements.length; i++) {
+        desc_preview_elements[i].addEventListener('click', function() {
+            var content = this.closest('.card').nextElementSibling;
+            if (!$(content).hasClass('desc-preview-content')) return;
+
+            if (content.style.display === "block") {
+                content.style.display = "none";
+            } else {
+                content.style.display = "block";
+            }
+
+            $(this).find('i').toggleClass('fa-times fa-align-left');
+            $(this).blur();
+        });
+    }
+</script>
+{% endblock %}

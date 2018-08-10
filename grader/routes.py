@@ -8,10 +8,13 @@ from flask import url_for, redirect, render_template, request, abort, flash, sen
 from flask_security import login_required, current_user
 
 from grader import application, db, client_secret_path, google_scopes, upload_file_path
-from grader.models import Contest, Problem, ContestParticipation, Submission, GoogleCredentials, TestRun
-from grader.utilities import run_subprocess_safe, run_testcase_compiled, run_testcase_python, get_scoreboard_results, get_google_credentials, credentials_to_json, json_credentials_to_dict
+from grader.models import Contest, Problem, GoogleCredentials
+from grader.utilities import run_subprocess_safe, run_testcase_compiled, run_testcase_python, \
+    get_scoreboard_results, get_google_credentials, credentials_to_json, json_credentials_to_dict
+
 from grader.forms import SubmissionForm
 
+import grader.pagination as pagination_lib
 import google.oauth2.credentials
 import google_auth_oauthlib.flow
 
@@ -57,6 +60,21 @@ def contests():
     display_open_contests = contests != None and any(contest.is_running() for contest in contests.all())
 
     return render_template('contests.html', contests=contests, display_open_contests=display_open_contests)    
+
+@application.route('/problems')
+def problems():
+    page = request.args.get('page', default=1, type=int)
+    if page < 1:
+        return redirect(pagination_lib.get_url_with_page('problems', 1))
+
+    all_problems = db.session.query(Problem).filter(~Problem.contests.any()).all()
+    max_page = pagination_lib.get_max_page(len(all_problems))
+
+    if page > max_page:
+        return redirect(pagination_lib.get_url_with_page('problems', max_page))
+
+    pagination_entries, problems_on_page = pagination_lib.paginate(all_problems, page)
+    return render_template('problems.html', problems=problems_on_page, pagination_entries=pagination_entries)
 
 @application.route('/contest/<int:contest_id>', methods=['GET', 'POST'])
 @login_required
