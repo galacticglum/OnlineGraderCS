@@ -6,7 +6,7 @@
 <ul class="pagination">
     {% for entry in pagination_entries %}
     <li class="page-item {{entry.state.to_html_str()}}">
-        <a class="page-link" href="{{entry.href}}">{{entry.value}}</a>
+        <a class="page-link" href="{{entry.href}}">{{entry.value|safe}}</a>
     </li>
     {% endfor%}
 </ul>

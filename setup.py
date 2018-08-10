@@ -30,7 +30,7 @@ with application.app_context():
                             problems=[Problem(name='Maximum Binary Path Sum', description='GIGGLE MY NIGGLE',
                                     points=5, difficulty=ProblemDifficultyType.easy)])
 
-    for i in range(1, 101):
+    for i in range(1000):
         db.session.add(Problem(name=f'Binary Tree Tilt {i}', description=
         'Some collapsible content. Click the button to toggle between showing and hiding the collapsible content. \
          Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod',
