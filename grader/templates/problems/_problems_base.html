@@ -191,11 +191,14 @@ Problems
         <aside class="col-md-4 blog-sidebar">
             <div class="card mb-4">
                 <h5 class="card-header">Search</h5>
-                <div class="card-body px-3 py-3 d-flex flex-column">
-                    <input type="text" class="form-control" placeholder="Search problems...">
+                <form class="card-body px-3 py-3 d-flex flex-column" method="get">
+                    <input type="hidden" name="page" value="1">
+                    <input type="hidden" name="sort_direction" value="{{sort_direction}}">
+
+                    <input type="text" name="search" class="form-control" placeholder="Search problems...">
                     <div class="form-check mt-2">
-                        <input class="form-check-input" type="checkbox" value="" id="defaultCheck1">
-                        <label class="form-check-label" for="defaultCheck1">
+                        <input name="hide_completed" class="form-check-input" type="checkbox" value="1" id="hide-completed-problems-check">
+                        <label class="form-check-label" for="hide-completed-problems-check">
                             Hide completed problems
                         </label>
                     </div>
@@ -209,11 +212,10 @@ Problems
                         <span><i>Acceptance Range</i></span>
                         <input id="acceptance-range-slider">     
                     </div>
-
-                    
+              
                     <hr class="w-100">
-                    <a href="#" class="ml-auto btn btn-primary">Go</a>
-                </div>
+                    <button type="submit" class="ml-auto btn btn-primary">Go</button>
+                </form>
             </div>
         </aside>
         <!-- /.blog-sidebar -->

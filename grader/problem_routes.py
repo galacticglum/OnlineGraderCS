@@ -44,8 +44,8 @@ def problems(sort_category):
         return add_url_params(url_for('problems', sort_category=sort_category), {**request.args, 'page': page_num})
 
     sort_direction = request.args.get('sort_direction', type=int)
-
     query = get_problem_query()
+
     if sort_category == 'trending':
         pass
     elif sort_category == 'alphabetical':
@@ -64,4 +64,8 @@ def problems(sort_category):
         return redirect(url_for('problems_no_category'))
 
     template_name = f'problems/problems_{sort_category}.html'
-    return render_template(template_name, **get_problems(query, url_func), sort_direction=sort_direction)
+    sort_direction_zero_url = add_url_params(request.url, {'sort_direction': 0})
+    sort_direction_one_url = add_url_params(request.url, {'sort_direction': 1})
+
+    return render_template(template_name, **get_problems(query, url_func), sort_direction=sort_direction, \
+        sort_direction_zero_url=sort_direction_zero_url, sort_direction_one_url=sort_direction_one_url)

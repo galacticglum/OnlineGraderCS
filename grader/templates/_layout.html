@@ -222,6 +222,25 @@
                 $("#layoutModal").modal();
             }
         });
+
+        function add_url_params(uri, params) {
+            for (var key in params) {
+                uri = add_url_param(uri, key, params[key]);
+            }
+
+            return uri;
+        }
+
+        function add_url_param(uri, key, value) {
+            var re = new RegExp("([?|&])" + key + "=.*?(&|$)", "i");
+            separator = uri.indexOf('?') !== -1 ? "&" : "?";
+            if (uri.match(re)) {
+                return uri.replace(re, '$1' + key + "=" + value + '$2');
+            }
+            else {
+                return uri + separator + key + "=" + value;
+            }
+        }
     </script>
     {% endblock %}
 
