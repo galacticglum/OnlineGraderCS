@@ -4,7 +4,7 @@ from grader import application, db
 from grader.models import Problem
 from grader.utilities import add_url_params
 
-from flask import render_template, url_for, request
+from flask import render_template, url_for, request, redirect
 
 def get_problem_query():
     return db.session.query(Problem).filter(~Problem.contests.any())
@@ -34,55 +34,34 @@ def get_problems(query, url_func):
     pagination_entries, items_on_page = pagination_lib.paginate(all_problems, page, url_func)
     return {'pagination_entries' : pagination_entries, 'problems' : items_on_page }
 
-@application.route('/problems/trending')
-def problems_trending():
+@application.route('/problems/')
+def problems_no_category():
+    return redirect(url_for('problems', sort_category='trending'))
+
+@application.route('/problems/<sort_category>/')
+def problems(sort_category):
     def url_func(page_num):
-        return add_url_params(url_for('problems_trending'), {'page':page_num})
+        return add_url_params(url_for('problems', sort_category=sort_category), {**request.args, 'page': page_num})
+
+    sort_direction = request.args.get('sort_direction', type=int)
 
     query = get_problem_query()
-    return render_template('problems_trending.html', **get_problems(query, url_func))
-
-@application.route('/problems/alphabetical', defaults={'direction': 'az'})
-@application.route('/problems/alphabetical/<direction>')
-def problems_alphabetical(direction):
-    query = get_problem_query()
-
-    if direction == 'az':
-        query = query.order_by(Problem.name)
-    elif direction == 'za':
-        query = query.order_by(Problem.name.desc())
+    if sort_category == 'trending':
+        pass
+    elif sort_category == 'alphabetical':
+        # Sort a-z
+        if sort_direction != 0:
+            query = query.order_by(Problem.name)
+        # Sort z-a
+        else:
+            query = query.order_by(Problem.name.desc())
+    elif sort_category == 'difficulty':
+        if sort_direction != 0:
+            query = query.order_by(Problem.difficulty)
+        else:
+            query = query.order_by(Problem.difficulty.desc())
     else:
-        return redirect(url_for('problems_alphabetical'))
+        return redirect(url_for('problems_no_category'))
 
-    def url_func(page_num):
-        return add_url_params(url_for('problems_alphabetical', direction=direction), {'page':page_num})
-
-    return render_template('problems_alphabetical.html', **get_problems(query, url_func), sorted_az=(direction == 'az'))
-
-@application.route('/problems/difficulty')
-def problems_difficulty():
-    def url_func(page_num):
-        return add_url_params(url_for('problems_difficulty'), {'page':page_num})
-
-    query = get_problem_query()
-    return render_template('problems_alphabetical.html', **get_problems(query, url_func))
-
-@application.route('/problems/acceptance')
-def problems_acceptance():
-    def url_func(page_num):
-        return add_url_params(url_for('problems_acceptance'), {'page':page_num})
-
-    query = get_problem_query()
-    return render_template('problems_alphabetical.html', **get_problems(query, url_func))
-
-@application.route('/problems/completion')
-def problems_completion():
-    def url_func(page_num):
-        return add_url_params(url_for('problems_completion'), {'page':page_num})
-
-    query = get_problem_query()
-    return render_template('problems_alphabetical.html', **get_problems(query, url_func))
-
-@application.route('/problems')
-def problems():
-    return redirect(url_for('problems_trending'))
+    template_name = f'problems/problems_{sort_category}.html'
+    return render_template(template_name, **get_problems(query, url_func), sort_direction=sort_direction)

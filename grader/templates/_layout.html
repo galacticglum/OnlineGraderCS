@@ -2,10 +2,10 @@
 
 <!-- href, id, caption -->
 {% set navigation_bar = [
-    ('problems', 'problems', 'Problems'),
+    ('problems_no_category', 'problems', 'Problems'),
     ('contests', 'contests', 'Contests'),
-    ('index', '#', 'Ranks'),
-    ('index', '#', 'About')
+    ('index', 'index', 'Ranks'),
+    ('index', 'index', 'About')
 ] -%}
 
 {% set active_page = active_page|default('index') -%}

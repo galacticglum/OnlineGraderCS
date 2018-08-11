@@ -60,5 +60,6 @@ def context_processor():
         formatted_datetime=grader.utilities.get_formatted_datetime,
         get_total_score=grader.utilities.get_total_score,
         get_user_full_name=grader.utilities.get_user_full_name,
-        has_authenticated_with_google=grader.utilities.has_authenticated_with_google
+        has_authenticated_with_google=grader.utilities.has_authenticated_with_google,
+        add_url_params=grader.utilities.add_url_params
     )

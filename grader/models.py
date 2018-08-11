@@ -42,8 +42,8 @@ class User(db.Model, UserMixin):
         return self.email
 
 class ProblemDifficultyType(enum.Enum):
-    easy = 0,
-    medium = 1,
+    easy = 0
+    medium = 1
     hard  = 2
 
     def __str__(self):

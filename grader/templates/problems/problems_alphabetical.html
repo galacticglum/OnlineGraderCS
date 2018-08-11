@@ -1,0 +1,15 @@
+{% extends 'problems/_problems_base.html' %}
+{% set active_sort_option = "Alphabetical" %}
+
+{% block sorting_options %}
+<a class="btn btn-sm view-button mr-1 py-0 my-0" role="button" data-toggle="tooltip" data-placement="top" title="Sort A-Z" data-delay='{"show":"1500"}'
+    href="{{url_for('problems', sort_category='alphabetical')}}">
+
+    <i class="fas fa-sort-alpha-down {% if sort_direction != 0 %}view-btn-active{% endif %}"></i>
+</a>
+<a class="btn btn-sm view-button mr-1 py-0 my-0" role="button" data-toggle="tooltip" data-placement="top" title="Sort Z-A" data-delay='{"show":"1500"}'
+    href="{{add_url_params(url_for('problems', sort_category='alphabetical'), {'sort_direction': 0})}}">
+
+    <i class="fas fa-sort-alpha-up {% if sort_direction == 0 %}view-btn-active{% endif %}"></i>
+</a>
+{% endblock %}

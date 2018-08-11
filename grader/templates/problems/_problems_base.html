@@ -1,13 +1,13 @@
 {% extends '_layout.html' %}
 {% set active_page = "problems" %}
 
-<!-- name, icon, route -->
+<!-- name, icon, sort category -->
 {% set sort_options = [
-    ('Trending', 'fas fa-fire', 'problems_trending'),
-    ('Alphabetical', 'fas fa-sort-alpha-down', 'problems_alphabetical'),
-    ('Difficulty', 'far fa-lightbulb', 'problems_difficulty'),
-    ('Acceptance', 'fas fa-percent', 'problems_acceptance'),
-    ('Completion', 'fas fa-check', 'problems_completion')
+    ('Trending', 'fas fa-fire', 'trending'),
+    ('Alphabetical', 'fas fa-sort-alpha-down', 'alphabetical'),
+    ('Difficulty', 'far fa-lightbulb', 'difficulty'),
+    ('Acceptance', 'fas fa-percent', 'acceptance'),
+    ('Completion', 'fas fa-check', 'completion')
 ] -%}
 
 {% set active_sort_option = active_sort_option|default('Trending') -%}
@@ -85,8 +85,8 @@ Problems
                 {% endfor %}
 
                 <div class="dropdown-menu" id="sort-menu-dropdown" aria-labelledby="sort-menu-button">
-                    {% for name, icon, route in sort_options %}
-                        <a class="dropdown-item {% if name == active_sort_option %}dropdown-item-active{% endif %}" href="{{url_for(route)}}">
+                    {% for name, icon, category in sort_options %}
+                        <a class="dropdown-item {% if name == active_sort_option %}dropdown-item-active{% endif %}" href="{{url_for('problems', sort_category=category)}}">
                             <i class="{{icon}}"></i>
                             <span class="my-auto ml-1">
                                 <strong>{{name}}</strong>
@@ -185,12 +185,6 @@ Problems
             <nav class="blog-pagination blog-pagination-bottom">
                 {{ gen_pagination() }}
             </nav>
-
-            <!-- <nav class="blog-pagination">
-                <a class="btn btn-outline-primary" href="#">Older</a>
-                <a class="btn btn-outline-secondary disabled" href="#">Newer</a>
-            </nav> -->
-
         </div>
         <!-- /.blog-main -->
 

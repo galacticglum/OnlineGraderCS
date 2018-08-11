@@ -2,6 +2,8 @@
 Populate a small db with some example entries.
 """
 
+import random
+
 from grader import application, db, user_datastore
 from grader.models import Role, Problem, Contest, ProblemDifficultyType
 from flask_security.utils import encrypt_password
@@ -30,11 +32,13 @@ with application.app_context():
                             problems=[Problem(name='Maximum Binary Path Sum', description='GIGGLE MY NIGGLE',
                                     points=5, difficulty=ProblemDifficultyType.easy)])
 
+    TEST_PROBLEM_DESCRIPTION = 'Some collapsible content. Click the button to toggle between showing and hiding \
+                                the collapsible content. Lorem ipsum dolor sit amet, consectetur adipisicing elit\
+                                , sed do eiusmod'
+
     for i in range(1000):
-        db.session.add(Problem(name=f'Binary Tree Tilt {i}', description=
-        'Some collapsible content. Click the button to toggle between showing and hiding the collapsible content. \
-         Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod',
-        points=5, difficulty=ProblemDifficultyType.medium))
+        db.session.add(Problem(name=f'Binary Tree Tilt {i}', description=TEST_PROBLEM_DESCRIPTION,
+                                points=5, difficulty=ProblemDifficultyType(random.randint(0,2))))
 
     db.session.add(test_contest)
     db.session.commit()
