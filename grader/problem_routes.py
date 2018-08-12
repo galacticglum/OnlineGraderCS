@@ -36,7 +36,7 @@ def get_problems(query, url_func):
 
 @application.route('/problems/')
 def problems_no_category():
-    return redirect(url_for('problems', sort_category='trending'))
+    return problems('trending')
 
 @application.route('/problems/<sort_category>/')
 def problems(sort_category):
