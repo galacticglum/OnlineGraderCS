@@ -2,6 +2,7 @@ from flask import jsonify, url_for, g, request
 from grader import db, application, token_auth, basic_auth, auth
 
 from grader.models import User
+from grader.http_errors import BadContentTypeError
 from grader.http_utilities import check_for_missing_params, error_response
 
 @token_auth.verify_token
@@ -25,7 +26,7 @@ def __verify_password(username, password):
 @application.route('/api/users/register', methods=['POST'])
 def register():
     if not request.is_json:
-        return error_response(415, 'Expected \'Content-Type: application/json\'')
+        raise BadContentTypeError('application/json')
 
     username = request.json.get('username')
     password = request.json.get('password')
