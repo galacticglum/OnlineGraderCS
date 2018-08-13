@@ -15,7 +15,7 @@ def __verify_token(token):
     return True
 
 @basic_auth.verify_password
-def __verify_password(username, password):
+def __verify_basic_auth(username, password):
     user = User.query.filter_by(username=username).first()
     if not user or not user.verify_password(password):
         return False
