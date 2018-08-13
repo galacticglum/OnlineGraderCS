@@ -10,7 +10,7 @@ application = Flask(__name__, instance_relative_config=True,
 
 application.config.from_pyfile('config_local.py')
 
-token_auth = HTTPTokenAuth(scheme='Token')
+token_auth = HTTPTokenAuth()
 basic_auth = HTTPBasicAuth()
 auth = MultiAuth(basic_auth, token_auth)
 db = SQLAlchemy(application)

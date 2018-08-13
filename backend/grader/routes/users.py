@@ -1,8 +1,8 @@
-from flask import abort, jsonify, url_for, g, request
+from flask import jsonify, url_for, g, request
 from grader import db, application, token_auth, basic_auth, auth
 
 from grader.models import User
-from grader.utilities import check_for_missing_params, error_response
+from grader.http_utilities import check_for_missing_params, error_response
 
 @token_auth.verify_token
 def __verify_token(token):
@@ -24,16 +24,18 @@ def __verify_password(username, password):
 
 @application.route('/api/users/register', methods=['POST'])
 def register():
+    if not request.is_json:
+        return error_response(415, 'Expected \'Content-Type: application/json\'')
+
     username = request.json.get('username')
     password = request.json.get('password')
     email = request.json.get('email')
     
-    # Check for missing arguments
     check_for_missing_params(username=username, password=password, email=email)
     
     if User.query.filter_by(username=username).first() is not None or \
         User.query.filter_by(email=email).first() is not None:
-        error_response(400, 'The user already exists!')
+        return error_response(400, 'The user already exists!')
 
     user = User(username, password, email)
     db.session.add(user)
@@ -46,7 +48,7 @@ def register():
 def get_user(id):
     user = User.query.get(id)
     if not user:
-        error_response(400, 'The user already exists!')
+        return error_response(400, 'The user already exists!')
 
     return jsonify(user.to_dict())
 
