@@ -13,7 +13,7 @@ class User(db.Model):
         self.username = username
         self.password_hash = pwd_context.encrypt(no_hash_password)
         self.email = email
-        
+
     def verify_password(self, password):
         return pwd_context.verify(password, self.password_hash)
 
@@ -23,7 +23,7 @@ class User(db.Model):
 
     @staticmethod
     def verify_auth_token(token):
-        serializer = Serializer(app.config['SECRET_KEY'])
+        serializer = Serializer(application.config['SECRET_KEY'])
         try:
             data = serializer.loads(token)
         except SignatureExpired:
