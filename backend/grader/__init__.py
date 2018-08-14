@@ -1,3 +1,9 @@
+"""
+This module initializes Flask, the grader server,
+and any middleware.
+
+"""
+
 import os
 
 from flask import Flask

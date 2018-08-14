@@ -6,8 +6,6 @@ from grader.http_errors import MissingParametersError, BadContentTypeError, \
 
 from grader.http_utilities import error_response
 
-__param_required_message = 'This parameter is required.'
-
 @application.errorhandler(BadContentTypeError)
 def __handle_bad_content_type_error(error):
     return error_response(415, 'Expected \'Content-Type: {0}\''.format(error.expected_content_type))
@@ -28,7 +26,9 @@ def __handle_invalid_user_credentials(error):
 
 @application.errorhandler(MissingParametersError)
 def __handle_missing_params_error(error):
-    field_errors = {empty_param:__param_required_message for empty_param in error.empty_params}
+    PARAM_REQUIRED_MESSAGE = 'This parameter is required.'
+
+    field_errors = {empty_param: PARAM_REQUIRED_MESSAGE for empty_param in error.empty_params}
     
     is_plural = len(error.empty_params) > 1
     conjunction_word = 'are' if is_plural  else 'is'
