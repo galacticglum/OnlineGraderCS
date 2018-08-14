@@ -1,15 +1,30 @@
 from grader import application
 from grader.utilities import list_join
 
-from grader.http_errors import MissingParametersError, BadContentTypeError
+from grader.http_errors import MissingParametersError, BadContentTypeError, \
+    MissingHeaderError, MissingUserError, InvalidUserCredentials
+
 from grader.http_utilities import error_response
 
 __param_required_message = 'This parameter is required.'
-__bad_content_type = 'Expected \'Content-Type: {0}\''
 
 @application.errorhandler(BadContentTypeError)
-def __handle_bad_content_type(error):
-    return error_response(415, __bad_content_type.format(error.expected_content_type))
+def __handle_bad_content_type_error(error):
+    return error_response(415, 'Expected \'Content-Type: {0}\''.format(error.expected_content_type))
+
+@application.errorhandler(MissingHeaderError)
+def __handle_missing_header_error(error):
+    return error_response(400, '\'{0} header is required by this request!\'' .format(error.header))
+
+@application.errorhandler(MissingUserError)
+def __handle_missing_user_error(error):
+    invalid_identity_info = list_join(error.identity_info, 'and')
+    return error_response(400, f'No user exists with {invalid_identity_info}!')
+
+@application.errorhandler(InvalidUserCredentials)
+def __handle_invalid_user_credentials(error):
+    invalid_identity_info = list_join(error.identity_info, 'and')
+    return error_response(400, f'Could not authenticate user with {invalid_identity_info}!')
 
 @application.errorhandler(MissingParametersError)
 def __handle_missing_params_error(error):

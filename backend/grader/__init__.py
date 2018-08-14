@@ -2,7 +2,7 @@ import os
 
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
-from flask_httpauth import HTTPTokenAuth, HTTPBasicAuth, MultiAuth
+from flask_jwt_extended import JWTManager
 
 # Initialize flask
 application = Flask(__name__, instance_relative_config=True,
@@ -10,9 +10,7 @@ application = Flask(__name__, instance_relative_config=True,
 
 application.config.from_pyfile('config_local.py')
 
-token_auth = HTTPTokenAuth()
-basic_auth = HTTPBasicAuth()
-auth = MultiAuth(basic_auth, token_auth)
+jwt = JWTManager(application)
 db = SQLAlchemy(application)
 
 import grader.routes

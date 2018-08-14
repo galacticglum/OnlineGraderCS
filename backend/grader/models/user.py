@@ -1,8 +1,6 @@
 from grader import application, db
 from passlib.apps import custom_app_context as pwd_context
 
-from itsdangerous import (TimedJSONWebSignatureSerializer
-                          as Serializer, BadSignature, SignatureExpired)
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(255), unique=True)
@@ -11,33 +9,42 @@ class User(db.Model):
 
     def __init__(self, username, no_hash_password, email):
         self.username = username
-        self.password_hash = pwd_context.encrypt(no_hash_password)
+        self.password_hash = User.__generate_hash(no_hash_password)
         self.email = email
 
-    def verify_password(self, password):
-        return pwd_context.verify(password, self.password_hash)
-
-    def generate_auth_token(self, expiration=600):
-        serializer = Serializer(application.config['SECRET_KEY'], expires_in=expiration)
-        return serializer.dumps({'id': self.id})
+    @staticmethod
+    def __generate_hash(password):
+        return pwd_context.hash(password)
 
     @staticmethod
-    def verify_auth_token(token):
-        serializer = Serializer(application.config['SECRET_KEY'])
-        try:
-            data = serializer.loads(token)
-        except SignatureExpired:
-            return None
-        except BadSignature:
-            return None
+    def verify_hash(candidate_hash, actual_hash):
+        return pwd_context.verify(candidate_hash, actual_hash)
 
-        user = User.query.get(data['id'])
-        return user
-
-    def to_dict(self, include_password=False):
-        return {
+    def to_json(self, include_password=False):
+        json_dict = {
             'id': self.id,
             'username': self.username,
             'email': self.email
         }
+
+        if include_password:
+            json_dict['password'] = self.password_hash
+        
+        return json_dict
+
+    @staticmethod
+    def find_by_id(id):
+        return User.query.filter_by(id=id).first()
+
+    @staticmethod
+    def find_by_username(username):
+        return User.query.filter_by(username=username).first()
+
+    @staticmethod
+    def find_by_email(email):
+        return User.query.filter_by(email=email).first()
+
+    @staticmethod
+    def all():
+        return {'users': [user.to_json() for user in UserModel.query.all()]}
     
