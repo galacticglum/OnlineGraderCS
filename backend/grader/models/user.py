@@ -32,6 +32,19 @@ class User(db.Model):
         
         return json_dict
 
+    def to_api_safe_json(self):
+        """
+        Converts this user to a dictionary object containing user information 
+        that is safe to send to the client.
+
+        :returns: A dictionary that can be converted to JSON
+        """
+
+        return {
+            'id': self.id,
+            'username': self.username
+        }
+
     @staticmethod
     def find_by_id(id):
         return User.query.filter_by(id=id).first()

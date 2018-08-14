@@ -26,8 +26,9 @@ def register():
     db.session.add(user)
     db.session.commit() 
 
-    access_token = create_access_token(identity=user.to_json())
-    refresh_token = create_refresh_token(identity=user.to_json())
+    user_json = user.to_json()
+    access_token = create_access_token(identity=user_json)
+    refresh_token = create_refresh_token(identity=user_json)
 
     return jsonify(status_code=201, message='User was created successfully!',  \
         access_token=access_token, refresh_token=refresh_token)
@@ -41,16 +42,15 @@ def authenticate():
     password = request.authorization['password']
 
     user = User.find_by_username(username)
-    user_json = user.to_json()
-
     if not user:
-        raise MissingUserError(**user_json)
+        raise MissingUserError(**user.to_api_safe_json())
 
     if not User.verify_hash(password, user.password_hash):
-        raise InvalidUserCredentials(**user_json)
+        raise InvalidUserCredentials(**user.to_api_safe_json())
 
-    access_token = create_access_token(identity=user.to_json())
-    refresh_token = create_refresh_token(identity=user.to_json())
+    user_json = user.to_json()
+    access_token = create_access_token(identity=user_json)
+    refresh_token = create_refresh_token(identity=user_json)
 
     return jsonify(status_code=201, message='User was authenticated successfully!',  \
         access_token=access_token, refresh_token=refresh_token)
