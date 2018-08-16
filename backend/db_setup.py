@@ -6,6 +6,6 @@ prompt = 'Are you sure you would like to continue? This will drop and recreate a
 
 if not stdio_confirm(prompt, resp=False):
     exit(1)
-    
+
 db.drop_all()
 db.create_all()
