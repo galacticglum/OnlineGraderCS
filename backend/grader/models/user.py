@@ -17,7 +17,7 @@ class User(db.Model):
     def __init__(self, username, plaintext_password, email):
         """
         Initializes a `User` object from a `username`, `plaintext_password`, and `email`.
-        The provided `plaintext_password` is hashed using the sha512 cryptographic hash 
+        The provided `plaintext_password` is hashed using the sha256 cryptographic hash 
         function before it is saved in the model (in the variable `password_hash`).
         Hashing the password ensures that the password is secure because the original
         plaintext password cannot be retrieved from the hash.
@@ -26,7 +26,7 @@ class User(db.Model):
             The username of the user.
         :param plaintext_password:
             The password of the user in plaintext. This value is never stored.
-            It is hashed using the sha512 cryptographic hash function and then saved.
+            It is hashed using the sha256 cryptographic hash function and then saved.
         :param email:
             The email address of the user.
         :returns:
