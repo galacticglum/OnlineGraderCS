@@ -1,0 +1,11 @@
+@import url('https://fonts.googleapis.com/css?family=Montserrat');
+
+.nav-header {
+    line-height: 1 !important;
+    border-bottom: 1px solid #e5e5e5;
+}
+
+.nav-header-brand {
+    font-family: 'Montserrat';
+    font-size: 2.25rem !important;
+}
