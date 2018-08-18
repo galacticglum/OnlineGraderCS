@@ -20,3 +20,18 @@ html body {
     transform: translatex(-50%);
   }
 }
+
+.h-250 {
+  height: 250px;
+}
+
+@media (min-width: 768px) {
+  .h-md-250 {
+    height: 250px;
+  }
+}
+
+.flex-auto {
+  -ms-flex: 0 0 auto;
+  flex: 0 0 auto;
+}
