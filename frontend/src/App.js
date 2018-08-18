@@ -2,10 +2,11 @@ import React, { Component } from 'react';
 import { Row } from 'reactstrap';
 
 import Navigation from './components/Navigation';
+import FeaturedPost from './components/FeaturedPost';
 import FeaturedProblem from './components/FeaturedProblem';
 import FeaturedContest from './components/FeaturedContest';
 
-class App extends Component {
+export default class App extends Component {
   state = {
     problem: {
       title: 'Sherlock and Array',
@@ -45,6 +46,11 @@ class App extends Component {
     return (
       <div className="content">
         <Navigation>
+          <FeaturedPost post={{
+            title: 'Title of a longer featured blog blog blog blog post',
+            content: `Multiple lines of text that form the lede, informing new readers quickly and efficiently about what\'s most interesting in this post\'s contents.`
+          }} />
+
           <Row>
             <FeaturedProblem problem={this.state.problem} />
             <FeaturedContest contest={this.state.contest} />
@@ -54,5 +60,3 @@ class App extends Component {
     );
   }
 }
-
-export default App;
