@@ -152,7 +152,7 @@ class User(db.Model):
         return User.query.filter_by(email=email).first()
 
     @staticmethod
-    def all(json_converter_func=user.to_api_safe_json):
+    def all(json_converter_func=lambda x: x.to_api_safe_json()):
         """
         Gets a dictionary object containing all the users in the database.
 
