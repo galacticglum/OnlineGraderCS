@@ -1,0 +1,21 @@
+#footer {
+    position: relative;
+    background: none repeat scroll 0 0 #eee;
+    border-left: 1px solid #d9dddf;
+    border-right: 1px solid #d9dddf;
+    border-bottom: 1px solid #d9dddf;
+    padding: 20px;
+    color: #8c8e90;
+}
+
+#powered-by a {
+    color: #777;
+}
+
+#footer-text a {
+    color: #333;
+}
+
+#footer-text {
+    margin: 10px;
+}
