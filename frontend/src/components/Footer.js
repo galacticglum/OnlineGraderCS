@@ -30,7 +30,7 @@ export default (props) => {
                 </div>
             </div>
 
-            <p class="text-center text-muted" id="footer-text">
+            <p className="text-center text-muted" id="footer-text">
                 &copy; 2018{' '}
                 <a href="https://galacticglum.com/">Shon Verch</a> and <a href="#">contributors</a>
             </p>
