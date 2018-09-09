@@ -1,0 +1,53 @@
+.utility-bar .header-text {
+    font-size: .875rem;
+    color: #6c757d;
+    margin-right: 1rem;
+}
+
+.utility-bar a.header-text:hover {
+    color: #007bff;
+}
+
+.utility-bar .active {
+    font-weight: 500;
+    color: #343a40;
+}
+
+.utility-bar .view-button {
+    font-size: 20px;
+
+    background: transparent;
+    color: #bad4ff;
+    border: 0px;
+}
+
+.utility-bar .view-button:hover {
+    cursor: pointer;
+    border: 0px;
+}
+
+.utility-bar .view-button:active {
+    border: 0px;
+}
+
+.utility-bar .view-button .view-btn-active {
+    color: #007bff;
+}
+
+.utility-bar .sort-option-button {
+    background: transparent;
+    font-size: 1rem;
+    border-radius: 0px;
+}
+
+#sort-menu-dropdown .dropdown-item:active {
+    color: white;
+}
+
+#sort-menu-dropdown .dropdown-item-active {
+    color: #007bff;
+}
+
+#sort-menu-dropdown .dropdown-item-active:active {
+    color: white;
+}

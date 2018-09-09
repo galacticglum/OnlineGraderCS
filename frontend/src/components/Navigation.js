@@ -35,7 +35,7 @@ export default class Navigation extends Component {
         return (
             <div className="container">
                 <Navbar light expand="md" className="justify-content-center py-3 nav-header">
-                    <NavbarBrand href="/" className="d-flex w-50 mr-auto text-dark nav-header-brand">
+                    <NavbarBrand tag={Link} to="/" className="d-flex w-50 mr-auto text-dark nav-header-brand">
                         <strong>
                             SLS
                             <span style={{letterSpacing: '6px'}}>
