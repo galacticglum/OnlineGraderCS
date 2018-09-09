@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
-import NewsPost from './NewsPost';
+import NewsPost from './BlogPost';
 
-export default class News extends Component {
+export default class Blog extends Component {
     render() {
         const postElements = this.props.posts.map((post, i) =>
             <div key={i}>
@@ -21,6 +21,6 @@ export default class News extends Component {
     }
 }
 
-News.defaultProps = {
+Blog.defaultProps = {
     headerTitle: "News"
 }

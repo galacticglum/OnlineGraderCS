@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import { Link } from 'react-router-dom'
 import {
     Collapse,
     Navbar,
@@ -49,22 +50,22 @@ export default class Navigation extends Component {
                     <Collapse isOpen={this.state.isOpen} className="w-100" navbar>
                         <Nav className="w-100 justify-content-center" navbar>
                             <NavItem>
-                                <NavLink href="/problems">Problems</NavLink>
+                                <NavLink tag={Link} to="/problems">Problems</NavLink>
                             </NavItem>
                             <NavItem>
-                                <NavLink href="/contests">Contests</NavLink>
+                                <NavLink tag={Link} to="/contests">Contests</NavLink>
                             </NavItem>
                             <NavItem>
-                                <NavLink href="/ranks">Ranks</NavLink>
+                                <NavLink tag={Link} to="/ranks">Ranks</NavLink>
                             </NavItem>
                             <NavItem>
-                                <NavLink href="/about">About</NavLink>
+                                <NavLink tag={Link} to="/about">About</NavLink>
                             </NavItem>
                         </Nav>
 
                         <Nav className="ml-auto w-100 justify-content-end align-items-center" navbar>
                             <NavItem>
-                                <NavLink className="text-muted" href="/search">
+                                <NavLink className="text-muted" tag={Link} to="/search">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
                                     strokeLinecap="round" strokeLinejoin="round">
                                     <circle cx="10.5" cy="10.5" r="7.5"></circle>

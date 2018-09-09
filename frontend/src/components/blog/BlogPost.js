@@ -1,7 +1,7 @@
 import React from 'react';
 import { Row, Col } from 'reactstrap';
 
-import './NewsPost.css';
+import './BlogPost.css';
 
 export default (props) => {
     return (
