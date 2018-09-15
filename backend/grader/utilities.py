@@ -80,3 +80,7 @@ def stdio_confirm(prompt=None, resp=False):
             return True
         if ans == 'n' or ans == 'N':
             return False
+
+def setattr_not_none(obj, field_name, value):
+    if not value: return
+    setattr(obj, field_name, value)
