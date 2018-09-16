@@ -5,7 +5,8 @@ class Problem extends Component {
     componentWillMount() {
         const { id } = this.props.match.params;
 
-        if (isNaN(parseInt(id))) {
+        let intId = parseInt(id);
+        if(intId != parseFloat(id) || intId <= 0) {
             this.props.history.replace('/404');
         }
     }
