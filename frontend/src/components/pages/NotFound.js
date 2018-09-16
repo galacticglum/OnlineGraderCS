@@ -2,6 +2,7 @@ import React, { Component } from 'react'
 
 import Navigation from '../Navigation';
 import Footer from '../Footer';
+import './NotFound.css'
 
 export default class NotFound extends Component {
     componentDidMount() {
