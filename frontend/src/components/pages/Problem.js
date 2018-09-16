@@ -1,6 +1,15 @@
 import React, { Component } from 'react'
+import { withRouter } from 'react-router-dom'; 
 
-export default class Problem extends Component {
+class Problem extends Component {
+    componentWillMount() {
+        const { id } = this.props.match.params;
+
+        if (isNaN(parseInt(id))) {
+            this.props.history.replace('/404');
+        }
+    }
+
     render() {
         const { id } = this.props.match.params;
 
@@ -11,3 +20,5 @@ export default class Problem extends Component {
         )
     }
 }
+
+export default withRouter(Problem);
