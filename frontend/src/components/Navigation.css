@@ -2,6 +2,9 @@
 
 .nav-header {
     line-height: 1 !important;
+}
+
+.nav-line {
     border-bottom: 1px solid #e5e5e5;
 }
 

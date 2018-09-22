@@ -15,7 +15,7 @@ import {
 
 import './Navigation.css';
 
-export default class Navigation extends Component {
+class Navigation extends Component {
     constructor(props) {
         super(props);
 
@@ -32,9 +32,11 @@ export default class Navigation extends Component {
     }
 
     render() {
+        const navLineClass = this.props.includeLine == true ? 'nav-line' : '';
+
         return (
             <div className="container">
-                <Navbar light expand="md" className="justify-content-center py-3 nav-header">
+                <Navbar light expand="md" className={"justify-content-center py-3 px-0 nav-header " + navLineClass}>
                     <NavbarBrand tag={Link} to="/" className="d-flex w-50 mr-auto text-dark nav-header-brand">
                         <strong>
                             SLS
@@ -102,3 +104,9 @@ export default class Navigation extends Component {
         );
     }
 }
+
+Navigation.defaultProps = {
+    includeLine: true
+}
+
+export default Navigation;
