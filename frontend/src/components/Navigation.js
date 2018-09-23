@@ -35,8 +35,8 @@ class Navigation extends Component {
         const navLineClass = this.props.includeLine == true ? 'nav-line' : '';
 
         return (
-            <div className="container">
-                <Navbar light expand="md" className={"justify-content-center py-3 px-0 nav-header " + navLineClass}>
+            <div className={'container px-0'}>
+                <Navbar light expand="md" className={"justify-content-center py-3 nav-header " + navLineClass}>
                     <NavbarBrand tag={Link} to="/" className="d-flex w-50 mr-auto text-dark nav-header-brand">
                         <strong>
                             SLS
@@ -99,14 +99,17 @@ class Navigation extends Component {
                     </Collapse>
                 </Navbar>
 
-                {this.props.children}
+                <div className={this.props.childrenClassName}>
+                    {this.props.children}
+                </div>
             </div>
         );
     }
 }
 
 Navigation.defaultProps = {
-    includeLine: true
+    includeLine: true,
+    childrenClassName: 'px-3'
 }
 
 export default Navigation;

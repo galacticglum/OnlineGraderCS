@@ -44,3 +44,12 @@ html body {
 .smallcaps {
   font-variant: small-caps;
 }
+
+.muted-link {
+  color: #6c757d;
+}
+
+.muted-link:hover {
+  text-decoration: none;
+  color: #343a40 !important;
+}
