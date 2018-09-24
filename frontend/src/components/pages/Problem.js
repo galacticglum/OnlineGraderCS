@@ -14,6 +14,7 @@ import BreadcrumbNavigation from '../BreadcrumbNavigation';
 import Footer from '../Footer';
 import TagList from '../TagList';
 import CollapseLabel from '../CollapseLabel';
+import MarkdownRenderer from '../MarkdownRenderer';
 
 import './Problem.css';
 
@@ -60,6 +61,7 @@ class Problem extends Component {
         fetch('http://localhost:5000/api/problem/' + id)
             .then(res => {
                 if(!res.ok) {
+                    console.log(res.statusText);
                     throw Error(res.statusText);
                 }
 
@@ -81,8 +83,8 @@ class Problem extends Component {
         if (this.state.problemData.problem.constraints) {
             constraintsSection = (        
                 <div className="pt-3 problem-constraints">
-                <DividerLine>Constraints</DividerLine>
-                    {this.state.problemData.problem.constraints}
+                    <DividerLine>Constraints</DividerLine>
+                    <MarkdownRenderer text={this.state.problemData.problem.constraints} />
                 </div>
             );
         }
@@ -92,7 +94,7 @@ class Problem extends Component {
             inputSpecSection = (
                 <div className="pt-3 problem-input-spec">
                     <DividerLine>Input Specification</DividerLine>
-                    {this.state.problemData.problem.input_spec}
+                    <MarkdownRenderer text={this.state.problemData.problem.input_spec} />
                 </div>
             );
         }
@@ -102,7 +104,7 @@ class Problem extends Component {
             outputSpecSection = (
                 <div className="pt-3 problem-output-spec">
                     <DividerLine>Output Specification</DividerLine>
-                    {this.state.problemData.problem.output_spec}
+                    <MarkdownRenderer text={this.state.problemData.problem.output_spec} />
                 </div>
             );
         }
@@ -124,13 +126,12 @@ class Problem extends Component {
                         <Row className="px-0">
                             <Col md="9">
                                 <div className="problem-description">
-                                    {this.state.problemData.problem.description}
+                                    <MarkdownRenderer text={this.state.problemData.problem.description} />
                                 </div>
 
                                 {constraintsSection}
                                 {inputSpecSection}
-                                {outputSpecSection}
-
+                                {outputSpecSection}       
                             </Col>
                             <Col md="3" className="order-first order-md-2">    
                                 <Button color="info" className="mb-0 btn-submit-solution">
