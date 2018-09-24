@@ -1,0 +1,11 @@
+.collapse-label:hover {
+    cursor: pointer;
+}
+
+.collapse-icon {
+    transition: .3s transform ease-in-out;
+}
+
+.collapse-icon.collapsed {
+    transform: rotate(90deg);
+}

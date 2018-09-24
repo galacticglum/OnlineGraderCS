@@ -5,13 +5,15 @@ import {
     BreadcrumbItem,
     Button,
     Badge,
-    Table } from 'reactstrap';
+    Table,
+    Collapse } from 'reactstrap';
 
 import { withRouter } from 'react-router-dom'; 
 
 import BreadcrumbNavigation from '../BreadcrumbNavigation';
 import Footer from '../Footer';
 import TagList from '../TagList';
+import CollapseLabel from '../CollapseLabel';
 
 import './Problem.css';
 
@@ -52,9 +54,8 @@ class Problem extends Component {
 
                 return res.json();
             })
-            .then(json => this.setState({problemData: json})).catch(() => {
-                this.props.history.replace('/404');
-            });
+            .then(json => this.setState({problemData: json}))
+            .catch(error => this.props.history.replace('/404'));
     }
 
     render() {
@@ -83,7 +84,6 @@ class Problem extends Component {
                             </div> */}
                             <hr/>
                         </Col>
-
                         <Row className="px-0">
                             <Col md="9">
                                 <div className="problem-description">
@@ -107,7 +107,6 @@ class Problem extends Component {
                                     <hr className="mt-0" />
                                     {this.state.problemData.problem.output_spec}
                                 </div>
-
                             </Col>
                             <Col md="3" className="order-first order-md-2">    
                                 <Button color="info" className="mb-0 btn-submit-solution">
@@ -120,6 +119,10 @@ class Problem extends Component {
                                         <th scope="row" className="m-0 p-0 text-muted">Difficulty</th>
                                         <td className="m-0 p-0 text-right"><Badge color="success">Easy</Badge></td>
                                     </tr>
+                                    <tr>
+                                        <th scope="row" className="m-0 p-0 text-muted">Points</th>
+                                        <td className="m-0 p-0 text-right">{this.state.problemData.problem.points}</td>
+                                    </tr>
                                     </tbody>
                                 </Table>
                                 <hr className="my-2" />
@@ -130,7 +133,9 @@ class Problem extends Component {
                                     <a href="#" className="muted-link">Best Submissions</a>
                                 </div>
                                 <hr className="my-2" />
-                                <TagList tags={this.state.tags} />
+                                <CollapseLabel isOpen={true} labelClassName="text-muted font-weight-bold" labelText="Tags">
+                                    <TagList className="ml-3" tags={this.state.tags} />
+                                </CollapseLabel>
                             </Col>
                         </Row>
 

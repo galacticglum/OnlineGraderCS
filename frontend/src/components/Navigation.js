@@ -32,7 +32,7 @@ class Navigation extends Component {
     }
 
     render() {
-        const navLineClass = this.props.includeLine == true ? 'nav-line' : '';
+        const navLineClass = this.props.includeLine === true ? 'nav-line' : '';
 
         return (
             <div className={'container px-0'}>

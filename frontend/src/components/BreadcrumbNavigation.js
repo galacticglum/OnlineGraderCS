@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { Breadcrumb, BreadcrumbItem } from 'reactstrap';
+import { Breadcrumb } from 'reactstrap';
 
 import Navigation from './Navigation';
 import './BreadcrumbNavigation.css';
