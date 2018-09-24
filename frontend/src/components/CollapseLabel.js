@@ -8,10 +8,6 @@ import { faChevronRight } from '@fortawesome/free-solid-svg-icons';
 import './CollapseLabel.css';
 
 class CollapseLabel extends Component {
-    constructor(props) {
-        super(props);
-    }
-
     state = {
         collapse: this.props.isOpen
     }

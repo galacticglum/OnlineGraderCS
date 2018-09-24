@@ -17,6 +17,17 @@ import CollapseLabel from '../CollapseLabel';
 
 import './Problem.css';
 
+class DividerLine extends Component {
+    render(props) {
+        return (
+            <div>
+                <h5>{this.props.children}</h5>
+                <hr className="mt-0" />
+            </div>
+        );
+    }
+}
+
 class Problem extends Component {
     state = {
         tags: [
@@ -66,6 +77,36 @@ class Problem extends Component {
             return null;
         }
 
+        let constraintsSection = null;
+        if (this.state.problemData.problem.constraints) {
+            constraintsSection = (        
+                <div className="pt-3 problem-constraints">
+                <DividerLine>Constraints</DividerLine>
+                    {this.state.problemData.problem.constraints}
+                </div>
+            );
+        }
+
+        let inputSpecSection = null;
+        if (this.state.problemData.problem.input_spec) {
+            inputSpecSection = (
+                <div className="pt-3 problem-input-spec">
+                    <DividerLine>Input Specification</DividerLine>
+                    {this.state.problemData.problem.input_spec}
+                </div>
+            );
+        }
+
+        let outputSpecSection = null;
+        if (this.state.problemData.problem.output_spec) {
+            outputSpecSection = (
+                <div className="pt-3 problem-output-spec">
+                    <DividerLine>Output Specification</DividerLine>
+                    {this.state.problemData.problem.output_spec}
+                </div>
+            );
+        }
+        
         return (
             <div>
                 <div className="content">
@@ -78,10 +119,6 @@ class Problem extends Component {
                     <div className="container py-3">
                         <Col md="12" className="px-0">
                             <h2 className="problem-title">{this.state.problemData.problem.title}</h2>     
-                            {/* <div className="d-flex flex-row"> 
-                                <h2 className="problem-title">CCC '15 S2 - Jerseys</h2>
-                                <Badge className="ml-auto align-self-end" color="success">Easy</Badge>
-                            </div> */}
                             <hr/>
                         </Col>
                         <Row className="px-0">
@@ -89,24 +126,11 @@ class Problem extends Component {
                                 <div className="problem-description">
                                     {this.state.problemData.problem.description}
                                 </div>
-           
-                                <div className="pt-3 problem-constraints">
-                                    <h5>Constraints</h5>
-                                    <hr className="mt-0" />
-                                    {this.state.problemData.problem.constraints}
-                                </div>
 
-                                <div className="pt-3 problem-input-spec">
-                                    <h5>Input Specification</h5>
-                                    <hr className="mt-0" />
-                                    {this.state.problemData.problem.input_spec}
-                                </div>
+                                {constraintsSection}
+                                {inputSpecSection}
+                                {outputSpecSection}
 
-                                <div className="pt-3 problem-output-spec">
-                                    <h5>Output Specification</h5>
-                                    <hr className="mt-0" />
-                                    {this.state.problemData.problem.output_spec}
-                                </div>
                             </Col>
                             <Col md="3" className="order-first order-md-2">    
                                 <Button color="info" className="mb-0 btn-submit-solution">
