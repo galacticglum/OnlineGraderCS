@@ -26,7 +26,7 @@ def __handle_invalid_user_credentials(error):
 
 @application.errorhandler(MissingParametersError)
 def __handle_missing_params_error(error):
-    PARAM_REQUIRED_MESSAGE = 'This parameter is required.'
+    PARAM_REQUIRED_MESSAGE = 'This field is required.'
 
     field_errors = {empty_param: PARAM_REQUIRED_MESSAGE for empty_param in error.empty_params}
     

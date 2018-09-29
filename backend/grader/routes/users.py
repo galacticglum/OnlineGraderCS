@@ -22,9 +22,12 @@ def register():
     email = request.json.get('email')
     
     check_for_missing_params(username=username, password=password, email=email)
-    
-    if User.find_by_username(username) or User.find_by_email(email):
-        return error_response(400, 'The user already exists!')
+
+    if User.find_by_username(username):
+        return error_response(409, 'The user already exists!', parameter_info={'username': 'This username is already taken'})
+
+    if User.find_by_email(email):
+        return error_response(409, 'The user already exists!', parameter_info={'email': 'This email is already taken'})
 
     user = User(username, password, email)
 
@@ -36,7 +39,7 @@ def register():
     refresh_token = create_refresh_token(identity=user_json)
 
     return jsonify(status_code=201, message='User was created successfully!',  \
-        access_token=access_token, refresh_token=refresh_token)
+        access_token=access_token, refresh_token=refresh_token, success=True)
 
 @application.route('/api/users/authenticate')
 def authenticate():

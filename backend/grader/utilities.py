@@ -9,7 +9,7 @@ def check_none(**kwargs):
         A list containing the names of the objects which are None.
     """
 
-    return list(filter(lambda x: kwargs[x] == None, kwargs.keys()))
+    return list(filter(lambda x: not kwargs[x], kwargs.keys()))
 
 def list_join(list, conjunction_str, format_func=str, oxford_comma=True):
     """
