@@ -5,26 +5,26 @@ export default function validateInput(data) {
     let errors = {};
 
     if (isEmpty(data.username)) {
-        errors.username = 'This field is required';
+        errors.username = 'Please choose a username.';
     }
 
     if (isEmpty(data.email)) {
-        errors.email = 'This field is required';
+        errors.email = 'Please provide an email address.';
     }
     else if(!Validator.isEmail(data.email)) {
-        errors.email = 'Email is invalid';
+        errors.email = 'Please provide a valid email address.';
     }
 
     if(!Validator.equals(data.password, data.passwordConfirmation)) {
-        errors.passwordConfirmation = 'Passwords must match';
+        errors.passwordConfirmation = 'Ruh-oh! The passwords do not match!';
     }
 
-    if (isEmpty(data.password)) {
-        errors.password = 'This field is required';
+    if (isEmpty(data.password) || !Validator.isLength(data.password, 6)) {
+        errors.password = 'Please choose a password that is at least 6 character long.';
     }
 
     if (isEmpty(data.passwordConfirmation)) {
-        errors.passwordConfirmation = 'This field is required';
+        errors.passwordConfirmation = 'Please confirm your password.';
     }
 
     return { errors, isValid: isEmpty(errors) }
