@@ -11,7 +11,8 @@ import {
     UncontrolledDropdown,
     DropdownToggle,
     DropdownMenu,
-    DropdownItem } from 'reactstrap';
+    DropdownItem,
+    Button } from 'reactstrap';
 
 import './Navigation.css';
 
@@ -75,7 +76,14 @@ class Navigation extends Component {
                                 </svg>
                                 </NavLink>
                             </NavItem>
-                            <UncontrolledDropdown nav inNavbar>
+                            <NavItem>
+                                <Link to="/login">
+                                    <Button outline color="secondary" size="sm">
+                                        Sign in
+                                    </Button>
+                                </Link>
+                            </NavItem>
+                            {/* <UncontrolledDropdown nav inNavbar>
                                 <DropdownToggle caret nav>
                                 Shon Verch{' '}
                                 </DropdownToggle>
@@ -94,7 +102,7 @@ class Navigation extends Component {
                                         Logout
                                     </DropdownItem>
                                 </DropdownMenu>
-                            </UncontrolledDropdown>
+                            </UncontrolledDropdown> */}
                         </Nav>
                     </Collapse>
                 </Navbar>

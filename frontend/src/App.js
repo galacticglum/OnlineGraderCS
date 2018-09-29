@@ -6,6 +6,8 @@ import Home from './components/pages/Home';
 import Problems from './components/pages/Problems';
 import Problem from './components/pages/Problem';
 import NotFound from './components/pages/NotFound';
+import Login from './components/pages/Login';
+import Register from './components/pages/Register';
 
 import loadScript from 'load-script';
 
@@ -32,6 +34,8 @@ export default class App extends Component {
             <BrowserRouter>
                 <Switch>
                     <Route path="/" component={Home} exact />
+                    <Route path="/login" component={Login} exact />
+                    <Route path="/register" component={Register} exact />
                     <Route path="/problems" component={Problems} exact />
                     <Route path="/contests" component={Home} exact />
                     <Route path="/ranks" component={Home} exact />
