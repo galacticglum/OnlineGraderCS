@@ -1,4 +1,6 @@
 import React, { Component } from 'react';
+import { withRouter } from 'react-router-dom'; 
+
 import PropTypes from 'prop-types';
 import {
     Button,
@@ -9,6 +11,8 @@ import {
     FormText,
     FormFeedback
 } from 'reactstrap';
+
+import validateInput from '../validations/signup';
 
 class RegisterForm extends Component {
     constructor(props) {
@@ -29,16 +33,29 @@ class RegisterForm extends Component {
     onChange(e) {
         this.setState({ [e.target.name]: e.target.value });
     }
+    
+    isValid() {
+        const { errors, isValid } = validateInput(this.state);
+        if (!isValid) {
+            this.setState({errors});
+        }
+
+        return isValid;
+    }
 
     onSubmit(e) {
         e.preventDefault();
 
-        this.setState({ isLoading: true });
-        this.props.userSignupRequest(this.state)
-            .then(() => {})
-            .catch((res) => {
-                this.setState({errors: res.response.data, isLoading: false})
-            });
+        if (this.isValid()) {
+            this.setState({ isLoading: true });
+            this.props.userSignupRequest(this.state)
+                .then(() => {
+                    this.props.history.push('/login');
+                })
+                .catch((res) => {
+                    this.setState({errors: res.response.data.parameter_info, isLoading: false})
+                });
+        }
     }
 
     render() {
@@ -50,33 +67,37 @@ class RegisterForm extends Component {
                     <Label for="usernameInput">Username</Label>
                     <Input type="text" name="username" id="usernameInput"
                         value={this.state.username} onChange={this.onChange} 
-                        invalid={(errors.parameter_info && errors.parameter_info.username) && true} />
+                        invalid={errors.username && true} />
 
-                    {(errors.parameter_info && errors.parameter_info.username) && 
-                        <FormFeedback>{errors.parameter_info.username}</FormFeedback>}
+                    {errors.username && 
+                        <FormFeedback>{errors.username}</FormFeedback>}
                 </FormGroup>
                 <FormGroup>
                     <Label for="emailInput">Email</Label>
                     <Input type="email" name="email" id="emailInput"
                         value={this.state.email} onChange={this.onChange}
-                        invalid={(errors.parameter_info && errors.parameter_info.email) && true} />
+                        invalid={errors.email && true} />
                         
-                    {(errors.parameter_info && errors.parameter_info.email) && 
-                        <FormFeedback>{errors.parameter_info.email}</FormFeedback>}
+                    {errors.email && 
+                        <FormFeedback>{errors.email}</FormFeedback>}
                 </FormGroup>
                 <FormGroup>
                     <Label for="passwordInput">Password</Label>
                     <Input type="password" name="password" id="passwordInput"
                         value={this.state.password} onChange={this.onChange}
-                        invalid={(errors.parameter_info && errors.parameter_info.password) && true} />
+                        invalid={errors.password && true} />
 
-                    {(errors.parameter_info && errors.parameter_info.password) && 
-                        <FormFeedback>{errors.parameter_info.password}</FormFeedback>}
+                    {errors.password && 
+                        <FormFeedback>{errors.password}</FormFeedback>}
                 </FormGroup>
                 <FormGroup>
                     <Label for="confirmPasswordInput">Confirm Password</Label>
                     <Input type="password" name="passwordConfirmation" id="confirmPasswordInput"
-                        value={this.state.passwordConfirmation} onChange={this.onChange} />
+                        value={this.state.passwordConfirmation} onChange={this.onChange}
+                        invalid={errors.passwordConfirmation && true} />
+                    
+                    {errors.passwordConfirmation && 
+                        <FormFeedback>{errors.passwordConfirmation}</FormFeedback>}
                 </FormGroup>
                 <FormGroup>
                     <Button color="primary" disabled={this.state.isLoading}>
@@ -92,4 +113,4 @@ RegisterForm.propTypes = {
     userSignupRequest: PropTypes.func.isRequired
 }
 
-export default RegisterForm;
+export default withRouter(RegisterForm);
