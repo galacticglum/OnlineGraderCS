@@ -46,6 +46,15 @@ export function userLoginRequest(username, password) {
     }
 }
 
+export function userLogout() {
+    return dispatch => {
+        localStorage.removeItem('access_token');
+        localStorage.removeItem('refresh_token');
+        setAuthorizationToken(false);
+        dispatch(setCurrentUser({}));
+    }
+}
+
 export function setCurrentUser(user) {
     return {
         type: SET_CURRENT_USER,
