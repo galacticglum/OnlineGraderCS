@@ -12,6 +12,9 @@ import Register from './components/pages/Register';
 
 import loadScript from 'load-script';
 import store from './store';
+import setAuthorizationToken from './utils/setAuthorizationToken';
+import { setCurrentUser } from './actions/authenticationActions';
+import jwt from 'jsonwebtoken';
 
 const MATHJAX_SCRIPT = 'https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML';
 const MATHJAX_OPTIONS = {
@@ -29,6 +32,14 @@ export default class App extends Component {
         loadScript(MATHJAX_SCRIPT, () => {
             window.MathJax.Hub.Config(MATHJAX_OPTIONS);
         });
+    }
+
+    componentWillMount() {
+        const token = localStorage.access_token;
+        if (token) {
+            setAuthorizationToken(token);
+            store.dispatch(setCurrentUser(jwt.decode(token)));
+        }
     }
 
     render() {

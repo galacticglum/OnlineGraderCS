@@ -35,7 +35,7 @@ def register():
     db.session.commit() 
 
     user_json = user.to_json()
-    access_token = create_access_token(identity=user_json)
+    access_token = create_access_token(identity=user_json, fresh=True)
     refresh_token = create_refresh_token(identity=user_json)
 
     return jsonify(status_code=201, message='User was created successfully!',  \
@@ -57,7 +57,7 @@ def authenticate():
         raise InvalidUserCredentials(**user.to_api_safe_json())
 
     user_json = user.to_json()
-    access_token = create_access_token(identity=user_json)
+    access_token = create_access_token(identity=user_json, fresh=True)
     refresh_token = create_refresh_token(identity=user_json)
 
     return jsonify(status_code=201, message='User was authenticated successfully!',  \
@@ -103,6 +103,6 @@ def get_user(id):
 @jwt_refresh_token_required
 def refresh_token():
     current_user = get_jwt_identity()
-    access_token = create_access_token(identity=current_user)
+    access_token = create_access_token(identity=current_user, fresh=False)
     
     return jsonify(status_code=201, message='Successfully refreshed access token!', access_token=access_token)
