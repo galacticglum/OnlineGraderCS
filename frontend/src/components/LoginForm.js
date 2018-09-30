@@ -7,7 +7,8 @@ import PropTypes from 'prop-types';
 import {
     Button,
     Form,
-    FormGroup
+    FormGroup,
+    UncontrolledAlert 
 } from 'reactstrap';
 
 import FormTextField from './FormTextField';
@@ -51,7 +52,7 @@ class LoginForm extends Component {
                 })
                 .catch(res => {
                     let errors = this.state.errors;
-                    errors['global'] = 'Invalid username or password!';
+                    errors['form'] = 'Invalid username or password!';
                     this.setState({errors: errors, isLoading: false});
                 });
         }
@@ -61,7 +62,9 @@ class LoginForm extends Component {
         const { errors } = this.state;
         return (
             <Form onSubmit={this.onSubmit}>
-                {errors.global && <p>{errors.global}</p>}
+                {errors.form && 
+                    <UncontrolledAlert color="danger">{errors.form}</UncontrolledAlert >}
+
                 <FormTextField field="username" value={this.state.username}
                     label="Username" error={errors.username}
                     type="text" onChange={this.onChange}
