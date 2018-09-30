@@ -106,7 +106,7 @@ class Navigation extends Component {
                                     </DropdownMenu>
                                 </UncontrolledDropdown>
                                 :
-                                <NavItem>
+                                <NavItem className="ml-2">
                                     <Link to="/login">
                                         <Button outline color="secondary" size="sm">
                                             Sign in
