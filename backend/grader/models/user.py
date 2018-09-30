@@ -152,6 +152,23 @@ class User(db.Model):
         return User.query.filter_by(email=email).first()
 
     @staticmethod
+    def find_by_username_and_email(username, email):
+        """
+        Finds a `User` object with the specified
+        username and email.
+
+        :param username:
+            the username of the User to find.  
+        :param email:
+            the email of the User to find.
+        :returns:
+            The User object with the specified username and email or None
+            if the user couldn't be found.
+        """
+
+        return User.query.filter_by(username=username, email=email).first()
+
+    @staticmethod
     def all(json_converter_func=lambda x: x.to_api_safe_json()):
         """
         Gets a dictionary object containing all the users in the database.

@@ -17,7 +17,7 @@ def __handle_missing_header_error(error):
 @application.errorhandler(MissingUserError)
 def __handle_missing_user_error(error):
     invalid_identity_info = list_join(error.identity_info, 'and')
-    return error_response(400, f'No user exists with {invalid_identity_info}!')
+    return error_response(404, f'No user exists with {invalid_identity_info}!')
 
 @application.errorhandler(InvalidUserCredentials)
 def __handle_invalid_user_credentials(error):

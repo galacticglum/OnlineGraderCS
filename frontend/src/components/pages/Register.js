@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
-import { userSignupRequest } from '../../actions/signupActions';
+import { userSignupRequest, userExists } from '../../actions/signupActions';
 
 import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom'
@@ -15,7 +15,7 @@ class Register extends Component {
     }
 
     render() {
-        const { userSignupRequest } = this.props;
+        const { userSignupRequest, userExists } = this.props;
         return (
             <div>
                 <div className="content">
@@ -26,7 +26,8 @@ class Register extends Component {
                             Register
                         </h3>
 
-                        <RegisterForm userSignupRequest={userSignupRequest} />
+                        <RegisterForm userSignupRequest={userSignupRequest} 
+                            userExists={userExists} />
                         <p>Already signed up? Please <Link to="/login">login</Link>.</p>
                     </div>
                 </div>
@@ -38,7 +39,8 @@ class Register extends Component {
 }
 
 Register.propTypes = {
-    userSignupRequest: PropTypes.func.isRequired
+    userSignupRequest: PropTypes.func.isRequired,
+    userExists: PropTypes.func.isRequired
 }
 
-export default connect(null, { userSignupRequest })(Register);
+export default connect(null, { userSignupRequest, userExists })(Register);

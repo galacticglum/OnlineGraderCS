@@ -51,7 +51,7 @@ def authenticate():
 
     user = User.find_by_username(username)
     if not user:
-        raise MissingUserError(**user.to_api_safe_json())
+        raise MissingUserError(username=username)
 
     if not User.verify_hash(password, user.password_hash):
         raise InvalidUserCredentials(**user.to_api_safe_json())
@@ -63,13 +63,41 @@ def authenticate():
     return jsonify(status_code=201, message='User was authenticated successfully!',  \
         access_token=access_token, refresh_token=refresh_token)
 
+@application.route('/api/users/find', methods=['POST'])
+def find_user():
+    if not request.is_json:
+        raise BadContentTypeError('application/json')
+
+    username = request.json.get('username')
+    email = request.json.get('email')
+
+    if not username and not email:
+        check_for_missing_params(username=username, email=email)
+
+    identity_info = {}
+    if username and not email:
+        identity_info['username'] = username
+        user = User.find_by_username(username)
+    elif not username and email:
+        identity_info['email'] = email
+        user = User.find_by_email(email)
+    else:
+        identity_info['username'] = username
+        identity_info['email'] = email
+        user = User.find_by_username_and_email(username, email)
+
+    if not user:
+        raise MissingUserError(**identity_info)
+        
+    return jsonify(user.to_api_safe_json())
+
 @application.route('/api/users/<int:id>')
 def get_user(id):
-    user = User.query.get(id)
+    user = User.find_by_id(id)
     if not user:
-        return error_response(400, f'No user exists with username \'{username}\'')
-
-    return jsonify(user.to_dict())
+        raise MissingUserError(id=id)
+        
+    return jsonify(user.to_api_safe_json())
 
 @application.route('/api/users/authenticate/refresh')
 @jwt_refresh_token_required
@@ -78,10 +106,3 @@ def refresh_token():
     access_token = create_access_token(identity=current_user)
     
     return jsonify(status_code=201, message='Successfully refreshed access token!', access_token=access_token)
-
-@application.route('/api/test')
-@jwt_required
-def user_test():
-    current_user_identity = get_jwt_identity()
-    user = User.find_by_id(current_user_identity['id'])
-    return jsonify(data=f'Hello, {user.username}')
