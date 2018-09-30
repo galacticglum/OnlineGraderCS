@@ -21,3 +21,14 @@ export function userExists(userData) {
         });
     }
 }
+
+export function userLoginRequest(username, password) {
+    return dispatch => {
+        return axios.get('http://localhost:5000/api/users/authenticate', {
+            auth: {
+                username: username,
+                password: password
+            }
+        })
+    }
+}

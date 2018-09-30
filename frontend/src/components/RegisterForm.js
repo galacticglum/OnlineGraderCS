@@ -5,10 +5,7 @@ import PropTypes from 'prop-types';
 import {
     Button,
     Form,
-    FormGroup,
-    Label,
-    Input,
-    FormFeedback
+    FormGroup
 } from 'reactstrap';
 
 import validateInput from '../validations/signup';
@@ -54,7 +51,7 @@ class RegisterForm extends Component {
                 .then(() => {
                     this.props.history.push('/login');
                 })
-                .catch((res) => {
+                .catch(res => {
                     this.setState({errors: res.response.data.parameter_info, isLoading: false})
                 });
         }
@@ -64,16 +61,18 @@ class RegisterForm extends Component {
         const field = e.target.name;
         const value = e.target.value;
         
-        this.props.userExists({[field]: value}).then(res => {
-            let errors = this.state.errors;
-            errors[field] = 'This ' + field + ' is already taken!';
-            this.setState({errors: errors, invalid: true});
+        this.props.userExists({[field]: value})
+            .then(res => {
+                let errors = this.state.errors;
+                errors[field] = 'This ' + field + ' is already taken!';
+                this.setState({errors: errors, invalid: true});
 
-        }).catch(res => {
-            let errors = this.state.errors;
-            errors[field] = null;
-            this.setState({errors: errors, invalid: false});
-        });    
+            })
+            .catch(res => {
+                let errors = this.state.errors;
+                errors[field] = null;
+                this.setState({errors: errors, invalid: false});
+            });    
     }
 
     render() {

@@ -1,9 +1,9 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
-import { userSignupRequest, userExists } from '../../actions/signupActions';
+import { userSignupRequest, userExists } from '../../actions/authenticationActions';
 
 import PropTypes from 'prop-types';
-import { Link } from 'react-router-dom'
+import { Link } from 'react-router-dom';
 
 import RegisterForm from '../RegisterForm';
 import Navigation from '../Navigation';

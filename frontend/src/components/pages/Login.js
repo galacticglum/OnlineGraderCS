@@ -1,41 +1,15 @@
-import React, { Component } from 'react'
-import { 
-    Button, 
-    Form, 
-    FormGroup,
-    Label,
-    Input,
-    FormText } from 'reactstrap';
+import React, { Component } from 'react';
 
+import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom'
 
+import LoginForm from '../LoginForm';
 import Navigation from '../Navigation';
 import Footer from '../Footer';
 
-export default class Login extends Component {
-    constructor(props) {
-        super(props);
-        this.state = {
-            username: '',
-            password: '',
-        }
-
-        this.onChange = this.onChange.bind(this);
-        this.onSubmit = this.onSubmit.bind(this);
-    }
-    
-
+class Login extends Component {
     componentDidMount() {
         document.title = "Login - Online Grader";
-    }
-
-    onChange(e) {
-        this.setState({ [e.target.name]: e.target.value});
-    }
-
-    onSubmit(e) {
-        e.preventDefault();
-        console.log(this.state);
     }
 
     render() {
@@ -49,23 +23,7 @@ export default class Login extends Component {
                             Login
                         </h3>
 
-                        <Form onSubmit={this.onSubmit}>
-                            <FormGroup>
-                                <Label for="usernameInput">Username</Label>
-                                <Input type="text" name="username" id="usernameInput" 
-                                        value={this.state.username} onChange={this.onChange} />
-                            </FormGroup>
-                            <FormGroup>
-                                <Label for="passwordInput">Password</Label>
-                                <Input type="password" name="password" id="passwordInput" 
-                                        value={this.state.password} onChange={this.onChange} />
-                            </FormGroup>
-                            <FormGroup>
-                                <Button color="primary">
-                                    Sign in
-                                </Button>
-                            </FormGroup>
-                        </Form>
+                        <LoginForm />
                         <p>Not yet signed up? Please <Link to="/register">register for an account</Link>.</p>
                     </div>
                 </div>
@@ -75,3 +33,5 @@ export default class Login extends Component {
         )
     }
 }
+
+export default Login;
