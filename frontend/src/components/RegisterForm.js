@@ -10,6 +10,7 @@ import {
 
 import validateInput from '../validations/signup';
 import FormTextField from './FormTextField';
+import isEmpty from 'lodash/isEmpty';
 
 class RegisterForm extends Component {
     constructor(props) {
@@ -20,6 +21,7 @@ class RegisterForm extends Component {
             password: '',
             passwordConfirmation: '',
             errors: {},
+            existErrors: {},
             isLoading: false,
             invalid: false
         }
@@ -63,31 +65,31 @@ class RegisterForm extends Component {
         
         this.props.userExists({[field]: value})
             .then(res => {
-                let errors = this.state.errors;
-                errors[field] = 'This ' + field + ' is already taken!';
-                this.setState({errors: errors, invalid: true});
+                let existErrors = this.state.existErrors;
+                existErrors[field] = 'This ' + field + ' is already taken!';
+                this.setState({existErrors: existErrors, invalid: true});
 
             })
             .catch(res => {
-                let errors = this.state.errors;
-                errors[field] = null;
-                this.setState({errors: errors, invalid: false});
+                let existErrors = this.state.existErrors;
+                delete existErrors[field];
+                this.setState({existErrors: existErrors, invalid: !isEmpty(existErrors)});
             });    
     }
 
     render() {
-        const { errors } = this.state;
+        const { errors, existErrors } = this.state;
 
         return (
             <Form onSubmit={this.onSubmit}>
                 <FormTextField field="username" value={this.state.username}
-                    label="Username" error={errors.username}
+                    label="Username" error={errors.username || existErrors.username}
                     type="text" onChange={this.onChange}
                     checkUserExists={this.checkUserExists}
                 />
 
                 <FormTextField field="email" value={this.state.email}
-                    label="Email" error={errors.email}
+                    label="Email" error={errors.email || existErrors.email}
                     type="text" onChange={this.onChange}
                     checkUserExists={this.checkUserExists}
                 />
