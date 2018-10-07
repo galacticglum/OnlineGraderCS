@@ -41,7 +41,6 @@ export function userLoginRequest(username, password) {
             localStorage.setItem('refresh_token', refresh_token);
 
             setAuthorizationToken(access_token);
-            dispatch(setCurrentUser(jwt.decode(access_token)));
         });
     }
 }

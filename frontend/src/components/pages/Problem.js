@@ -9,6 +9,7 @@ import {
     Collapse } from 'reactstrap';
 
 import { withRouter } from 'react-router-dom'; 
+import axios from 'axios';
 
 import BreadcrumbNavigation from '../BreadcrumbNavigation';
 import Footer from '../Footer';
@@ -58,16 +59,8 @@ class Problem extends Component {
     componentWillMount() {
         const { id } = this.props.match.params;
 
-        fetch('http://localhost:5000/api/problem/' + id)
-            .then(res => {
-                if(!res.ok) {
-                    console.log(res.statusText);
-                    throw Error(res.statusText);
-                }
-
-                return res.json();
-            })
-            .then(json => this.setState({problemData: json}))
+        axios.get('http://localhost:5000/api/problem/' + id)
+            .then(res => this.setState({problemData: res.data}))
             .catch(error => this.props.history.replace('/404'));
     }
 

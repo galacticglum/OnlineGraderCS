@@ -13,8 +13,10 @@ import Register from './components/pages/Register';
 import loadScript from 'load-script';
 import store from './store';
 import setAuthorizationToken from './utils/setAuthorizationToken';
-import { setCurrentUser } from './actions/authenticationActions';
 import jwt from 'jsonwebtoken';
+import axios from 'axios';
+
+import { userLogout } from './actions/authenticationActions';
 
 const MATHJAX_SCRIPT = 'https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML';
 const MATHJAX_OPTIONS = {
@@ -35,11 +37,49 @@ export default class App extends Component {
     }
 
     componentWillMount() {
-        const token = localStorage.access_token;
-        if (token) {
-            setAuthorizationToken(token);
-            store.dispatch(setCurrentUser(jwt.decode(token)));
-        }
+        this.createVerifyTokenInterceptor();
+        setAuthorizationToken(localStorage.access_token);
+    }
+
+    createVerifyTokenInterceptor() {
+        this.verifyTokenInterceptor = axios.interceptors.request.use((config) => {
+            const accessToken = localStorage.access_token;
+            const refreshToken = localStorage.refresh_token;
+    
+            if (accessToken && refreshToken) {
+                const decodedToken = jwt.decode(accessToken);
+                const dateNow = new Date();
+    
+                const isExpired = decodedToken.exp < dateNow.getTime() / 1000;
+                if (isExpired) {
+                    axios.interceptors.request.eject(this.verifyTokenInterceptor);
+
+                    // Access Token is expired
+                    // Send a request for a new access
+                    // token using the refresh token
+                    axios.get('http://localhost:5000/api/users/authenticate/refresh', {
+                        headers: {
+                            'Authorization': 'Bearer ' + refreshToken
+                        }
+                    }).then((res) => {
+                        const newToken = res.access_token;
+                        localStorage.setItem('access_token', newToken);
+                        setAuthorizationToken(newToken); 
+                        this.createVerifyTokenInterceptor();
+
+                    }).catch((error) => {
+                        console.log(error);
+
+                        store.dispatch(userLogout());
+                        this.createVerifyTokenInterceptor();
+                    });
+                }
+    
+                console.log('isExpired: ' + isExpired);
+            }
+    
+            return config;
+        });
     }
 
     render() {
