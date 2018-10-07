@@ -9,6 +9,7 @@ import Problem from './components/pages/Problem';
 import NotFound from './components/pages/NotFound';
 import Login from './components/pages/Login';
 import Register from './components/pages/Register';
+import Settings from './components/pages/Settings';
 
 import loadScript from 'load-script';
 import store from './store';
@@ -95,6 +96,7 @@ export default class App extends Component {
                         <Route path="/ranks" component={Home} exact />
                         <Route path="/about" component={Home} exact />
                         <Route path="/problem/:id" component={Problem} exact />
+                        <Route path="/settings" component={Settings} exact />
                         <Route path="*" component={NotFound} />
                     </Switch>
                 </BrowserRouter>
