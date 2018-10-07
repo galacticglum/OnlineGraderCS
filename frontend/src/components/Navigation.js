@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { Link } from 'react-router-dom'
+import { Link, withRouter } from 'react-router-dom'
 import {
     Collapse,
     Navbar,
@@ -107,7 +107,7 @@ class Navigation extends Component {
                                 </UncontrolledDropdown>
                                 :
                                 <NavItem className="ml-2">
-                                    <Link to="/login">
+                                    <Link to={{pathname: '/login', state: { referrer: this.props.location }}}>
                                         <Button outline color="secondary" size="sm">
                                             Sign in
                                     </Button>
@@ -142,4 +142,4 @@ function mapStateToProps(state) {
     }
 }
 
-export default connect(mapStateToProps, { userLogout })(Navigation);
+export default withRouter(connect(mapStateToProps, { userLogout })(Navigation));

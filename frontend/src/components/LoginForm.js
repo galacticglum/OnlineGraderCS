@@ -48,7 +48,11 @@ class LoginForm extends Component {
             this.setState({ isLoading: true });
             this.props.userLoginRequest(this.state.username, this.state.password)
                 .then(() => {
-                    this.props.history.push('/');
+                    if (this.props.location.state && this.props.location.state.referrer) {
+                        this.props.history.push(this.props.location.state.referrer.pathname);
+                    } else {
+                        this.props.history.push('/');
+                    }
                 })
                 .catch(res => {
                     let errors = this.state.errors;

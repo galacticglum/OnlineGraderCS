@@ -5,20 +5,18 @@ import PropTypes from 'prop-types';
 
 export default function(ComposedComponent) {
     class Authenticate extends Component {
-        checkAuthentication(isAuthenticated, redirectUrl='/login') {
-            if (!isAuthenticated) {
-                this.props.history.replace(redirectUrl);
-            }
-        }
-
         componentWillMount() {
             const { isAuthenticated } = this.props.authentication;
-            this.checkAuthentication(isAuthenticated);
+            if (!isAuthenticated) {
+                this.props.history.replace('/login', { referrer: this.props.location });
+            }
         }
 
         componentWillUpdate(nextProps) {
             const { isAuthenticated } = nextProps.authentication;
-            this.checkAuthentication(isAuthenticated, '/');
+            if (!isAuthenticated) {
+                this.props.history.replace('/');
+            }
         }
 
         render() {
