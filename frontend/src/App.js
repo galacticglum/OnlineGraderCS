@@ -46,9 +46,11 @@ export default class App extends Component {
         this.verifyTokenInterceptor = axios.interceptors.request.use((config) => {
             const accessToken = localStorage.access_token;
             const refreshToken = localStorage.refresh_token;
-    
+
             if (accessToken && refreshToken) {
                 const decodedToken = jwt.decode(accessToken);
+                if (!decodedToken) return config;
+
                 const dateNow = new Date();
     
                 const isExpired = decodedToken.exp < dateNow.getTime() / 1000;
@@ -70,7 +72,6 @@ export default class App extends Component {
 
                     }).catch((error) => {
                         console.log(error);
-
                         store.dispatch(userLogout());
                         this.createVerifyTokenInterceptor();
                     });

@@ -47,14 +47,15 @@ class LoginForm extends Component {
         if(this.isValid()) {
             this.setState({ isLoading: true });
             this.props.userLoginRequest(this.state.username, this.state.password)
-                .then(() => {
+                .then(res => {
                     if (this.props.location.state && this.props.location.state.referrer) {
                         this.props.history.push(this.props.location.state.referrer.pathname);
                     } else {
                         this.props.history.push('/');
                     }
                 })
-                .catch(res => {
+                .catch(error => {
+                    console.log(error)
                     let errors = this.state.errors;
                     errors['form'] = 'Invalid username or password!';
                     this.setState({errors: errors, isLoading: false});
