@@ -6,6 +6,7 @@ import { Provider } from 'react-redux';
 import Home from './components/pages/Home';
 import Problems from './components/pages/Problems';
 import Problem from './components/pages/Problem';
+import ProblemSubmit from './components/pages/ProblemSubmit';
 import NotFound from './components/pages/NotFound';
 import Login from './components/pages/Login';
 import Register from './components/pages/Register';
@@ -42,6 +43,10 @@ export default class App extends Component {
         setAuthorizationToken(localStorage.access_token);
     }
 
+    // TODO: Instead of intercepting all axios requests,
+    // use Redux to make all authentication API calls with
+    // another Redux middleware which verifies the access token
+    // and refreshes it if need be.
     createVerifyTokenInterceptor() {
         this.verifyTokenInterceptor = axios.interceptors.request.use((config) => {
             const accessToken = localStorage.access_token;
@@ -52,7 +57,6 @@ export default class App extends Component {
                 if (!decodedToken) return config;
 
                 const dateNow = new Date();
-    
                 const isExpired = decodedToken.exp < dateNow.getTime() / 1000;
                 if (isExpired) {
                     axios.interceptors.request.eject(this.verifyTokenInterceptor);
@@ -65,13 +69,13 @@ export default class App extends Component {
                             'Authorization': 'Bearer ' + refreshToken
                         }
                     }).then((res) => {
-                        const newToken = res.access_token;
+                        const newToken = res.data.access_token;
                         localStorage.setItem('access_token', newToken);
                         setAuthorizationToken(newToken); 
                         this.createVerifyTokenInterceptor();
-
                     }).catch((error) => {
                         console.log(error);
+                        console.log('unable to authenticate with refresh token')
                         store.dispatch(userLogout());
                         this.createVerifyTokenInterceptor();
                     });
@@ -97,6 +101,7 @@ export default class App extends Component {
                         <Route path="/ranks" component={Home} exact />
                         <Route path="/about" component={Home} exact />
                         <Route path="/problem/:id" component={Problem} exact />
+                        <Route path="/problem/:id/submit" component={ProblemSubmit} exact />
                         <Route path="/settings" component={Settings} exact />
                         <Route path="*" component={NotFound} />
                     </Switch>

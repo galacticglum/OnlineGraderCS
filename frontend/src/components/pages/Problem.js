@@ -8,8 +8,10 @@ import {
     Table,
     Collapse } from 'reactstrap';
 
-import { withRouter } from 'react-router-dom'; 
-import axios from 'axios';
+import PropTypes from 'prop-types';
+import { Link, withRouter } from 'react-router-dom'; 
+import { connect } from 'react-redux';
+import { getProblemData } from '../../actions/problemActions';
 
 import BreadcrumbNavigation from '../BreadcrumbNavigation';
 import Footer from '../Footer';
@@ -31,35 +33,39 @@ class DividerLine extends Component {
 }
 
 class Problem extends Component {
-    state = {
-        tags: [
-            {
-                name: 'algorithms',
-                className: 'badge-danger'
-            },
-            {
-                name: 'graphs',
-                className: 'badge-warning'
-            },
-            {
-                name: 'maths',
-                className: 'badge-info'
-            },
-            {
-                name: 'xyz',
-                className: 'badge-dark'
-            },
-            {
-                name: 'abc',
-                className: 'badge-info'
-            }
-        ]
+    constructor(props) {
+        super(props);
+        this.state = {
+            tags: [
+                {
+                    name: 'algorithms',
+                    className: 'badge-danger'
+                },
+                {
+                    name: 'graphs',
+                    className: 'badge-warning'
+                },
+                {
+                    name: 'maths',
+                    className: 'badge-info'
+                },
+                {
+                    name: 'xyz',
+                    className: 'badge-dark'
+                },
+                {
+                    name: 'abc',
+                    className: 'badge-info'
+                }
+            ]
+        }
     }
+    
 
-    componentWillMount() {
+    componentDidMount() {
         const { id } = this.props.match.params;
 
-        axios.get('http://localhost:5000/api/problem/' + id)
+        this.props.getProblemData(id)
             .then(res => this.setState({problemData: res.data}))
             .catch(error => this.props.history.replace('/404'));
     }
@@ -127,9 +133,11 @@ class Problem extends Component {
                                 {outputSpecSection}       
                             </Col>
                             <Col md="3" className="order-first order-md-2">    
-                                <Button color="info" className="mb-0 btn-submit-solution">
-                                    Submit Solution
-                                </Button>
+                                <Link to={this.props.match.params.id + '/submit'}>
+                                    <Button color="info" className="mb-0 btn-submit-solution">
+                                        Submit Solution
+                                    </Button>
+                                </Link>
                                 <hr className="my-2" />
                                 <Table className="m-0" borderless={true}>
                                     <tbody>
@@ -166,4 +174,8 @@ class Problem extends Component {
     }
 }
 
-export default withRouter(Problem);
+Problem.propTypes = {
+    getProblemData: PropTypes.func.isRequired
+}
+
+export default connect(null, { getProblemData })(withRouter(Problem));
